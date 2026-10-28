@@ -234,7 +234,7 @@
 
 <div class="app-container">
   <h1>
-    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.6</span>
+    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.7</span>
     <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
   </h1>
 
@@ -351,7 +351,8 @@ let currentTab = "farm";
 let currentSubTab = "current";
 let tickInterval = null;
 let sessionTimerInterval = null;
-let worker = null;
+let audioCtx = null;
+let silentOsc = null;
 
 if (settings.device === "pc" && !settings.colsPcSet) {
   settings.cols = 4;
@@ -404,6 +405,22 @@ function getTimer(i) {
   if (!t) return null;
   if (typeof t === "number") return { end: t, killedAt: t - RESPAWN_MS };
   return t;
+}
+
+// ФУНКЦИЯ ДЛЯ РАЗБУДКИ БРАУЗЕРА (ТИХИЙ ЗВУК)
+function keepAlive() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    silentOsc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0.01; // Очень тихо, почти беззвучно
+    silentOsc.connect(gain);
+    gain.connect(audioCtx.destination);
+    silentOsc.start();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
 }
 
 function switchMainTab(tab) {
@@ -534,6 +551,11 @@ function updateBossCard(el, i, now) {
       const s = Math.floor((left % 60000) / 1000);
       const timeStr = `${m}:${s.toString().padStart(2, "0")}`;
       if (statusEl.textContent !== timeStr) statusEl.textContent = timeStr;
+      
+      if (left <= 15000 && left > 0 && !el.dataset.notified15s) {
+        el.dataset.notified15s = "1";
+        showNotification(`⏱ ${boss.name} респавнится!`, `Осталось 15 секунд до появления.`, i, 'warning');
+      }
     }
     return;
   }
@@ -621,6 +643,9 @@ function render() {
 
 function tick() {
   if (currentTab === "edit" || currentTab === "settings" || currentSubTab === "stats") return;
+  
+  keepAlive(); // Держим браузер активным
+
   const now = Date.now();
 
   if (currentTab === "farm") {
@@ -656,106 +681,6 @@ function tick() {
     updateBossCard(el, i, now);
   });
 }
-
-// ==========================================
-// БЛОК ФОНОВОГО РАБОТНИКА (WEB WORKER)
-// ==========================================
-const workerCode = `
-  let timers = {};
-  let interval = null;
-  
-  self.onmessage = function(e) {
-    if (e.data.type === 'start') {
-      timers = e.data.timers;
-      if (interval) clearInterval(interval);
-      interval = setInterval(checkTimers, 1000);
-    } else if (e.data.type === 'update') {
-      timers = e.data.timers;
-    } else if (e.data.type === 'stop') {
-      clearInterval(interval);
-    }
-  };
-
-  function checkTimers() {
-    const now = Date.now();
-    for (const i in timers) {
-      const t = timers[i];
-      const end = typeof t === 'number' ? t : t.end;
-      if (!end) continue;
-      
-      const left = end - now;
-      if (left <= 0) {
-        self.postMessage({ type: 'bossReady', id: i });
-      } else if (left <= 15000) {
-        self.postMessage({ type: 'bossWarning', id: i });
-      }
-    }
-  }
-`;
-
-let workerUrl = null;
-let workerInstance = null;
-
-function initWorker() {
-  if (workerInstance) return;
-  try {
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    workerUrl = URL.createObjectURL(blob);
-    workerInstance = new Worker(workerUrl);
-    
-    workerInstance.onmessage = function(e) {
-      const id = parseInt(e.data.id);
-      
-      if (e.data.type === 'bossWarning') {
-        const el = grid.querySelector(`[data-index="${id}"]`);
-        if (el && !el.dataset.notified15s) {
-          el.dataset.notified15s = "1";
-          showNotification(`⏱ ${BOSSES[id].name} респавнится!`, `Осталось 15 секунд до появления.`, id, 'warning');
-        }
-      } else if (e.data.type === 'bossReady') {
-        const el = grid.querySelector(`[data-index="${id}"]`);
-        if (el && !el.dataset.notified) {
-          el.dataset.notified = "1";
-          notifyReady(BOSSES[id].name, id);
-        }
-      }
-    };
-    
-    updateWorkerTimers();
-  } catch (e) {
-    console.error("Ошибка инициализации Worker:", e);
-  }
-}
-
-function updateWorkerTimers() {
-  if (workerInstance) {
-    const activeTimers = {};
-    for (const i in timers) {
-      const t = timers[i];
-      if (t) activeTimers[i] = t;
-    }
-    workerInstance.postMessage({ type: 'update', timers: activeTimers });
-  }
-}
-
-const originalStartBoss = startBoss;
-startBoss = function(i, force = false) {
-  originalStartBoss(i, force);
-  updateWorkerTimers();
-};
-
-const originalResetBoss = resetBoss;
-resetBoss = function(i) {
-  originalResetBoss(i);
-  updateWorkerTimers();
-};
-
-const originalResetAll = resetAll;
-resetAll = function() {
-  originalResetAll();
-  updateWorkerTimers();
-};
-// ==========================================
 
 function toggleSelect(i) {
   const idx = farm.indexOf(i);
@@ -863,6 +788,7 @@ function testNotificationGeneric(callback) {
 function testNotification() {
   testNotificationGeneric(() => {
     alert("Тестовое уведомление появится через 5 секунд. Можете свернуть браузер!");
+    keepAlive(); // Будим аудио
     setTimeout(() => {
       new Notification("🔔 Тест уведомлений", {
         body: "Если вы видите это сообщение, уведомления работают корректно!",
@@ -875,6 +801,7 @@ function testNotification() {
 function testBossNotification() {
   testNotificationGeneric(() => {
     alert("Тестовое уведомление о боссе появится через 3 секунды. Можете свернуть браузер!");
+    keepAlive(); // Будим аудио
     setTimeout(() => {
       new Notification("⏱ Шрам респавнится!", {
         body: "Осталось 15 секунд до появления.",
@@ -1180,8 +1107,6 @@ function resetSettings() {
 
 applySettings();
 switchMainTab("farm");
-
-initWorker();
 
 if (!localStorage.getItem(WELCOME_KEY)) {
   openWelcome();
