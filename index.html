@@ -232,9 +232,12 @@
 </head>
 <body class="">
 
+<!-- НЕВИДИМЫЙ IFRAME С ТИШИНОЙ (Чтобы Chrome не засыпал) -->
+<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&controls=0&loop=1" style="position:absolute; width:1px; height:1px; opacity:0.01; pointer-events:none; border:none;" allow="autoplay"></iframe>
+
 <div class="app-container">
   <h1>
-    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.6.2</span>
+    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.7.0</span>
     <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
   </h1>
 
@@ -351,7 +354,6 @@ let currentTab = "farm";
 let currentSubTab = "current";
 let tickInterval = null;
 let sessionTimerInterval = null;
-let swRegistration = null;
 
 if (settings.device === "pc" && !settings.colsPcSet) {
   settings.cols = 4;
@@ -694,52 +696,25 @@ function resetAll() {
   timers = {}; saveTimers(); render();
 }
 
-// ==========================================
-// SERVICE WORKER (ПРАВИЛЬНАЯ РЕГИСТРАЦИЯ)
-// ==========================================
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
-    swRegistration = reg;
-    
-    // Если воркер еще не активирован, ждем
-    if (!reg.active) {
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'activated') {
-            swRegistration = newWorker;
-          }
-        });
-      });
-    }
-  }).catch(err => {
-    console.log('Ошибка регистрации SW:', err);
-  });
-}
-
 function showNotification(title, body, bossIndex, type) {
   if (!("Notification" in window)) return;
   if (Notification.permission !== "granted") return;
 
-  // Если Service Worker активен, отправляем простой текст
-  if (swRegistration) {
-    swRegistration.postMessage({
-      type: 'SHOW_NOTIFICATION',
-      title: title,
-      body: body
-    });
-  } else {
-    // Запасной вариант (если SW не загрузился)
-    try {
-      new Notification(title, {
-        body: body,
-        icon: KEY_ICON_URL,
-        tag: 'boss-' + bossIndex + '-' + type,
-        renotify: true
-      });
-    } catch (e) {
-      console.log("Ошибка уведомления:", e);
-    }
+  const options = {
+    body: body,
+    icon: KEY_ICON_URL,
+    tag: 'boss-' + bossIndex + '-' + type,
+    renotify: true
+  };
+
+  try {
+    const notif = new Notification(title, options);
+    notif.onclick = function() {
+      window.focus();
+      notif.close();
+    };
+  } catch (e) {
+    console.log("Ошибка уведомления:", e);
   }
 }
 
