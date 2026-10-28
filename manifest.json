@@ -1,0 +1,15 @@
+{
+  "name": "Таймеры Боссов P2",
+  "short_name": "Боссы P2",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    {
+      "src": "https://static.r2online.ru/wiki/icons/v2/item09/96_96_48.webp",
+      "sizes": "96x96",
+      "type": "image/webp"
+    }
+  ]
+}
