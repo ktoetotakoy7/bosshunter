@@ -234,7 +234,7 @@
 
 <div class="app-container">
   <h1>
-    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.7</span>
+    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.8</span>
     <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
   </h1>
 
@@ -351,8 +351,7 @@ let currentTab = "farm";
 let currentSubTab = "current";
 let tickInterval = null;
 let sessionTimerInterval = null;
-let audioCtx = null;
-let silentOsc = null;
+let swRegistration = null;
 
 if (settings.device === "pc" && !settings.colsPcSet) {
   settings.cols = 4;
@@ -405,22 +404,6 @@ function getTimer(i) {
   if (!t) return null;
   if (typeof t === "number") return { end: t, killedAt: t - RESPAWN_MS };
   return t;
-}
-
-// ФУНКЦИЯ ДЛЯ РАЗБУДКИ БРАУЗЕРА (ТИХИЙ ЗВУК)
-function keepAlive() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    silentOsc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    gain.gain.value = 0.01; // Очень тихо, почти беззвучно
-    silentOsc.connect(gain);
-    gain.connect(audioCtx.destination);
-    silentOsc.start();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
 }
 
 function switchMainTab(tab) {
@@ -643,9 +626,6 @@ function render() {
 
 function tick() {
   if (currentTab === "edit" || currentTab === "settings" || currentSubTab === "stats") return;
-  
-  keepAlive(); // Держим браузер активным
-
   const now = Date.now();
 
   if (currentTab === "farm") {
@@ -714,6 +694,17 @@ function resetAll() {
   timers = {}; saveTimers(); render();
 }
 
+// ==========================================
+// SERVICE WORKER ДЛЯ УВЕДОМЛЕНИЙ
+// ==========================================
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    swRegistration = reg;
+  }).catch(err => {
+    console.log('Ошибка регистрации SW:', err);
+  });
+}
+
 function showNotification(title, body, bossIndex, type) {
   if (!("Notification" in window)) return;
   if (Notification.permission !== "granted") return;
@@ -725,26 +716,15 @@ function showNotification(title, body, bossIndex, type) {
     renotify: true
   };
 
-  try {
-    const notif = new Notification(title, options);
-    notif.onclick = function() {
-      window.focus();
-      if (type === 'ready' && bossIndex !== -1) {
-        setTimeout(() => {
-          if (currentTab !== 'farm' || currentSubTab !== 'current') {
-             switchMainTab('farm');
-             switchSubTab('current');
-          }
-          const el = grid.querySelector(`[data-index="${bossIndex}"]`);
-          if (el && el.dataset.state === 'ready') {
-             startBoss(bossIndex, true);
-          }
-        }, 100);
-      }
-      notif.close();
-    };
-  } catch (e) {
-    console.log("Не удалось показать уведомление", e);
+  // Если Service Worker зарегистрирован, используем его (это обходит засыпание)
+  if (swRegistration) {
+    swRegistration.showNotification(title, options);
+  } else {
+    try {
+      new Notification(title, options);
+    } catch (e) {
+      console.log("Ошибка уведомления:", e);
+    }
   }
 }
 
@@ -788,12 +768,8 @@ function testNotificationGeneric(callback) {
 function testNotification() {
   testNotificationGeneric(() => {
     alert("Тестовое уведомление появится через 5 секунд. Можете свернуть браузер!");
-    keepAlive(); // Будим аудио
     setTimeout(() => {
-      new Notification("🔔 Тест уведомлений", {
-        body: "Если вы видите это сообщение, уведомления работают корректно!",
-        icon: KEY_ICON_URL
-      });
+      showNotification("🔔 Тест уведомлений", "Если вы видите это сообщение, уведомления работают!", -1, 'test');
     }, 5000);
   });
 }
@@ -801,14 +777,8 @@ function testNotification() {
 function testBossNotification() {
   testNotificationGeneric(() => {
     alert("Тестовое уведомление о боссе появится через 3 секунды. Можете свернуть браузер!");
-    keepAlive(); // Будим аудио
     setTimeout(() => {
-      new Notification("⏱ Шрам респавнится!", {
-        body: "Осталось 15 секунд до появления.",
-        icon: KEY_ICON_URL,
-        tag: 'test-boss',
-        renotify: true
-      });
+      showNotification("⏱ Шрам респавнится!", "Осталось 15 секунд до появления.", -1, 'test-boss');
     }, 3000);
   });
 }
