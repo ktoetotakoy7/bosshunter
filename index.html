@@ -234,7 +234,7 @@
 
 <div class="app-container">
   <h1>
-    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.8</span>
+    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.9</span>
     <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
   </h1>
 
@@ -716,7 +716,6 @@ function showNotification(title, body, bossIndex, type) {
     renotify: true
   };
 
-  // Если Service Worker зарегистрирован, используем его (это обходит засыпание)
   if (swRegistration) {
     swRegistration.showNotification(title, options);
   } else {
