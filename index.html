@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#080c14">
-<title>Таймеры боссов P2</title>
+<title>BOSSHUNTER v0.6.3</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,6 +41,8 @@
   }
 
   body.device-pc { --max-width: 1400px; --body-padding: 20px; }
+  body.minimal-mode .boss .avatar { display: none !important; }
+  body.minimal-mode .boss { justify-content: center; min-height: 80px; padding: 12px; }
 
   body {
     font-family: var(--font-main); background-color: var(--bg-color); color: var(--text-color);
@@ -52,12 +54,25 @@
   body.theme-cronus::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 100%, rgba(180, 30, 30, 0.3) 0%, transparent 60%), radial-gradient(ellipse at 10% 50%, rgba(30, 60, 120, 0.2) 0%, transparent 50%), #05070a; pointer-events: none; z-index: -1; }
   body.theme-pivoplay::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 0%, rgba(245, 166, 35, 0.1) 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, rgba(107, 62, 18, 0.3) 0%, transparent 70%), #140e08; pointer-events: none; z-index: -1; }
 
-  .app-container { width: 100%; max-width: var(--max-width); display: flex; flex-direction: column; }
+  .app-container { width: 100%; max-width: var(--max-width); display: flex; flex-direction: column; position: relative; }
 
-  h1 { font-size: 18px; text-align: center; margin-bottom: 10px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+  .header { position: relative; width: 100%; text-align: center; margin-bottom: 12px; }
+  h1 { font-size: 18px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
   body.theme-cronus h1 { font-size: 22px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 0 5px rgba(212, 175, 55, 0.3); }
   body.theme-pivoplay h1 { font-size: 22px; font-weight: 800; color: #fff4e6; text-shadow: 0 0 15px rgba(245, 166, 35, 0.6), 0 0 5px rgba(245, 166, 35, 0.4); }
   body.theme-cronus h1 span, body.theme-pivoplay h1 span { color: var(--accent) !important; text-shadow: 0 0 8px rgba(255, 255, 255, 0.5); }
+
+  .btn-settings-top {
+    position: absolute; right: 0; top: 0;
+    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    background: var(--panel-bg); border: 1px solid var(--panel-border);
+    border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.2s;
+  }
+  body.theme-cronus .btn-settings-top {
+    border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    background: linear-gradient(180deg, #2a3648 0%, #141b26 100%); border-color: #4a5a75;
+  }
+  .btn-settings-top:hover { filter: brightness(1.2); }
 
   .tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--panel-bg); padding: 4px; border-radius: var(--border-radius); border: 1px solid var(--panel-border); clip-path: var(--clip-path); }
   body.theme-cronus .tabs { border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -71,7 +86,8 @@
   .sub-tabs { display: flex; gap: 4px; margin-bottom: 12px; padding: 0 4px; }
   .sub-tab { flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; background: rgba(0,0,0,0.2); transition: 0.2s; text-transform: uppercase; }
   .sub-tab.active { background: var(--panel-border); color: var(--text-color); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
-  body.theme-cronus .sub-tab.active { background: #3a3020; color: #fff; }
+  body.theme-cronus .sub-tab { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); border: 1px solid var(--panel-border); }
+  body.theme-cronus .sub-tab.active { background: var(--metal-gradient); color: #05070a; border: none; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
   body.theme-pivoplay .sub-tab.active { background: #5c3817; color: #fff4e6; }
 
   .farm-controls { display: flex; justify-content: space-between; align-items: center; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); padding: 10px 16px; margin-bottom: 12px; clip-path: var(--clip-path); }
@@ -86,18 +102,64 @@
   .btn-farm.stop { background: #e94560; color: #fff; border-radius: 8px; clip-path: none; }
   .btn-farm:active { filter: brightness(1.2); }
 
+  .search-bar { margin-bottom: 16px; width: 100%; display: none; }
+  .search-bar input { width: 100%; padding: 12px 16px; border-radius: var(--border-radius); border: 1px solid var(--panel-border); background: var(--panel-bg); color: var(--text-color); font-family: var(--font-main); font-size: 14px; outline: none; }
+  body.theme-cronus .search-bar input { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); background: #0d111a; border-color: #3a465e; }
+  .search-bar input::placeholder { color: var(--text-muted); }
+
+  .category-title {
+    font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    margin: 20px 0 10px 0; padding-bottom: 6px; border-bottom: 2px solid var(--panel-border);
+    color: var(--accent); text-align: left; width: 100%;
+  }
+  body.theme-cronus .category-title { text-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
+  .category-title.empty-cat { opacity: 0.5; font-size: 13px; margin-top: 30px; }
+
   .grid { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: calc(10px * var(--scale)); }
   body.device-pc .grid { gap: 12px; }
 
-  .boss { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); clip-path: var(--clip-path); padding: max(calc(8px * var(--scale)), 2px); text-align: center; user-select: none; display: flex; flex-direction: column; align-items: center; gap: max(calc(4px * var(--scale)), 1px); position: relative; overflow: hidden; touch-action: pan-y; }
+  /* Базовая карточка */
+  .boss { 
+    background: var(--panel-bg); 
+    border: 1px solid var(--panel-border); 
+    border-radius: var(--border-radius); 
+    clip-path: var(--clip-path); 
+    padding: max(calc(8px * var(--scale)), 2px); 
+    text-align: center; 
+    user-select: none; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: max(calc(4px * var(--scale)), 1px); 
+    position: relative; 
+    overflow: hidden; 
+    touch-action: pan-y; 
+  }
   body.theme-cronus .boss { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6); border: 1px solid #3a3020; }
   body.theme-pivoplay .boss { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); border: 1px solid #5c3817; }
 
-  .btn-key { position: absolute; top: 4px; right: 4px; width: 32px; height: 32px; background: #d4af37; border: 2px solid #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 5; transition: transform 0.1s; padding: 4px; }
+  /* Псевдоэлемент для градиентной обводки в Cronus */
+  body.theme-cronus .boss::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 2px; /* Толщина обводки */
+    background: transparent;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    clip-path: var(--clip-path);
+    z-index: 10;
+    transition: background 0.3s;
+  }
+
+  .btn-key { position: absolute; top: 4px; right: 4px; width: 32px; height: 32px; background: #d4af37; border: 2px solid #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 15; transition: transform 0.1s; padding: 4px; }
   .btn-key img { width: 100%; height: 100%; object-fit: contain; }
   .btn-key:active { transform: scale(0.85); }
   .btn-key.disabled { filter: grayscale(1) opacity(0.4); cursor: not-allowed; pointer-events: none; border-color: #888; background: #555; }
   .btn-key.show { display: flex; }
+  body.minimal-mode .btn-key { top: 2px; right: 2px; width: 26px; height: 26px; }
 
   .boss .avatar { width: 100%; aspect-ratio: 1 / 1; border-radius: max(calc(8px * var(--scale)), 2px); overflow: hidden; background: #0f1a30; display: flex; align-items: center; justify-content: center; position: relative; pointer-events: none; border: 1px solid transparent; }
   body.theme-cronus .boss .avatar { border-color: #2a3245; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
@@ -116,29 +178,72 @@
   .boss .status { font-size: max(calc(13px * var(--scale)), 9px); color: var(--text-muted); font-variant-numeric: tabular-nums; pointer-events: none; min-height: calc(18px * var(--scale)); white-space: nowrap; }
   
   .boss.running { border-color: var(--accent); background: var(--bg-color); }
-  body.theme-cronus .boss.running { border-color: #d4af37; } body.theme-pivoplay .boss.running { border-color: #f5a623; }
+  body.theme-cronus .boss.running { border-color: transparent; } /* Убираем стандартный бордер, работает псевдоэлемент */
+  body.theme-pivoplay .boss.running { border-color: #f5a623; }
+  
   .boss.running .status { color: #ffb347; font-size: max(calc(22px * var(--scale)), 11px); font-weight: 700; }
-  body.theme-cronus .boss.running .status { color: #d4af37; } body.theme-pivoplay .boss.running .status { color: #f5a623; }
+  body.theme-cronus .boss.running .status { color: #d4af37; }
+  
+  /* Металлическая обводка для RUNNING */
+  body.theme-cronus .boss.running::before {
+    background: var(--metal-gradient);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+
+  body.theme-cronus.minimal-mode .boss.running .status {
+    background: var(--metal-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.4));
+  }
+
+  body.theme-pivoplay .boss.running .status { color: #f5a623; }
 
   .boss.ready { border-color: #4ade80; background: #1a3a2a; }
-  body.theme-cronus .boss.ready { background: rgba(20, 50, 30, 0.8); } body.theme-pivoplay .boss.ready { background: rgba(20, 50, 30, 0.6); }
+  body.theme-cronus .boss.ready { border-color: transparent; } 
+  body.theme-cronus .boss.ready::before {
+    background: linear-gradient(180deg, #4ade80 0%, #166534 100%);
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+  }
+  
+  body.theme-pivoplay .boss.ready { background: rgba(20, 50, 30, 0.6); }
   .boss.ready .status { color: #4ade80; font-size: max(calc(16px * var(--scale)), 10px); font-weight: 700; }
 
-  .actions { display: flex; flex-direction: column; gap: max(calc(4px * var(--scale)), 1px); width: 100%; margin-top: max(calc(4px * var(--scale)), 1px); }
+  .actions { display: flex; flex-direction: column; gap: max(calc(4px * var(--scale)), 1px); width: 100%; margin-top: max(calc(4px * var(--scale)), 1px); position: relative; z-index: 15; }
   .actions.row { flex-direction: row; }
   .actions button { flex: 1; border: 1px solid transparent; border-radius: max(calc(8px * var(--scale)), 2px); padding: max(calc(8px * var(--scale)), 2px) max(calc(4px * var(--scale)), 1px); font-size: max(calc(11px * var(--scale)), 8px); font-weight: 700; cursor: pointer; transition: filter 0.1s, transform 0.1s; color: #fff; touch-action: manipulation; min-height: max(calc(36px * var(--scale)), 18px); font-family: var(--font-main); text-transform: uppercase; }
+  
   body.theme-cronus .actions button { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); border: 1px solid rgba(255,255,255,0.1); }
   body.theme-pivoplay .actions button { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); border: 1px solid rgba(255,255,255,0.1); }
+  
   .actions button:active { filter: brightness(1.3); transform: scale(0.97); }
   .btn-kill { background: var(--btn-kill); } .btn-reset { background: var(--btn-reset); color: var(--text-color); }
-  body.theme-cronus .btn-kill { background: #2a2418; border-color: #6b5a3e; color: #e2cfa0; text-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
+  
+  body.theme-cronus .btn-kill { background: var(--metal-gradient); color: #05070a; border: none; font-weight: 800; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
   body.theme-pivoplay .btn-kill { background: #6b3e12; border-color: #a86b2a; color: #fff4e6; }
-  body.theme-cronus .btn-reset { background: #1e293b; border-color: #4a5a75; }
+  
+  body.theme-cronus .btn-reset { background: linear-gradient(180deg, #2a3648 0%, #141b26 100%); border-color: #4a5a75; color: #e2e8f0; }
   body.theme-pivoplay .btn-reset { background: #3d2208; border-color: #6b4623; color: #e8d4b8; }
 
-  .boss.selectable { cursor: pointer; } .boss.selected { border-color: #4ade80; background: #1a3a2a; }
-  body.theme-cronus .boss.selected { background: rgba(20, 50, 30, 0.8); } body.theme-pivoplay .boss.selected { background: rgba(20, 50, 30, 0.6); }
-  .boss.selected::after { content: "✓"; position: absolute; top: calc(6px * var(--scale)); right: calc(8px * var(--scale)); color: #4ade80; font-weight: 700; font-size: calc(18px * var(--scale)); text-shadow: 0 0 4px #000; pointer-events: none; }
+  .boss.selectable { cursor: pointer; } 
+  .boss.selected { border-color: #4ade80; background: #1a3a2a; }
+  
+  /* Выбранная карточка в Cronus */
+  body.theme-cronus .boss.selected { 
+    border-color: transparent; 
+    background: rgba(42, 36, 24, 0.6); 
+  }
+  body.theme-cronus .boss.selected::before {
+    background: var(--metal-gradient); /* Металлическая обводка */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  }
+  
+  body.theme-pivoplay .boss.selected { background: rgba(20, 50, 30, 0.6); }
+  
+  .boss.selected::after { content: "✓"; position: absolute; top: calc(6px * var(--scale)); right: calc(8px * var(--scale)); color: #4ade80; font-weight: 700; font-size: calc(18px * var(--scale)); text-shadow: 0 0 4px #000; pointer-events: none; z-index: 20; }
+  body.theme-cronus .boss.selected::after { color: #d4af37; }
+  
   .boss.not-selected { opacity: 0.4; }
 
   .empty { text-align: center; color: var(--text-muted); padding: 40px 20px; font-size: 14px; grid-column: 1 / -1; }
@@ -173,12 +278,14 @@
   .scale-row { display: flex; align-items: center; gap: 12px; }
   .scale-row input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 6px; background: var(--panel-border); border-radius: 3px; outline: none; }
   .scale-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: var(--accent); border-radius: 50%; cursor: pointer; }
-  body.theme-cronus .scale-row input[type="range"]::-webkit-slider-thumb { background: #d4af37; border-radius: 2px; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
+  
+  body.theme-cronus .scale-row input[type="range"]::-webkit-slider-thumb { background: var(--metal-gradient); border-radius: 0; border: 1px solid #4a5a75; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
   body.theme-pivoplay .scale-row input[type="range"]::-webkit-slider-thumb { background: #f5a623; border-radius: 2px; box-shadow: 0 0 10px rgba(245, 166, 35, 0.5); clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
   .scale-value { font-size: 14px; font-weight: 700; color: var(--accent); min-width: 50px; text-align: right; font-variant-numeric: tabular-nums; }
 
   .reset-settings { background: var(--btn-reset); color: var(--text-color); border: 1px solid var(--panel-border); padding: 12px 20px; border-radius: var(--border-radius); font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; touch-action: manipulation; font-family: var(--font-main); text-transform: uppercase; }
-  body.theme-cronus .reset-settings { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); background: linear-gradient(180deg, #2a3648 0%, #141b26 100%); border-color: #4a5a75; }
+  body.theme-cronus .reset-settings { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); background: linear-gradient(180deg, #2a3648 0%, #141b26 100%); border-color: #4a5a75; color: #e2e8f0; }
+  body.theme-cronus .btn-notify-enable { background: var(--metal-gradient) !important; color: #05070a !important; border: none !important; font-weight: 800 !important; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2) !important; }
   body.theme-pivoplay .reset-settings { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); background: linear-gradient(180deg, #4a301c 0%, #26170a 100%); border-color: #6b4623; color: #e8d4b8; }
 
   .footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-color); padding: 10px 12px; text-align: center; border-top: 1px solid var(--panel-border); z-index: 10; }
@@ -234,16 +341,18 @@
 <body class="">
 
 <div class="app-container">
-  <h1>
-    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.8.0</span>
-    <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
-  </h1>
+  <div class="header">
+    <h1>
+      BOSSHUNTER <span style="color:var(--text-muted); font-size:11px;">v0.6.3</span>
+      <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
+    </h1>
+    <div class="btn-settings-top" onclick="switchMainTab('settings')" title="Настройки">⚙️</div>
+  </div>
 
   <div class="tabs">
     <div class="tab active" data-tab="farm" onclick="switchMainTab('farm')">📋 Фарм</div>
     <div class="tab" data-tab="all" onclick="switchMainTab('all')">🗂 Все</div>
-    <div class="tab" data-tab="edit" onclick="switchMainTab('edit')">☑️ Выбрать</div>
-    <div class="tab" data-tab="settings" onclick="switchMainTab('settings')">⚙️</div>
+    <div class="tab" data-tab="edit" onclick="switchMainTab('edit')">☑️ Отслеживать</div>
   </div>
 
   <div class="sub-tabs" id="farmSubTabs" style="display:flex;">
@@ -259,7 +368,11 @@
     <button id="farmBtn" class="btn-farm" onclick="toggleFarmSession()">Начать фарм</button>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="search-bar" id="searchBar">
+    <input type="text" id="searchInput" placeholder="Поиск босса по имени..." oninput="render()">
+  </div>
+
+  <div id="gridContainer" style="width: 100%;"></div>
   <div class="stats-container" id="statsView" style="display:none;"></div>
   <div class="settings" id="settings" style="display:none;"></div>
 
@@ -280,7 +393,7 @@
 <div class="welcome-modal" id="welcomeModal">
   <div class="welcome-content">
     <button class="welcome-close" onclick="closeWelcome()">✕</button>
-    <h2>🛡️ Добро пожаловать в таймеры боссов R2 Cronus!</h2>
+    <h2>🛡️ Добро пожаловать в BOSSHUNTER!</h2>
     <p class="intro">У тебя есть кольцо телепортации или гигантский запас рун ТП? Это приложение для тебя! =)</p>
     <p>Хватит бегать по всей карте впустую, надеясь, что босс уже реснулся. Теперь весь фарм под контролем. Наш инструмент создан, чтобы экономить твои руны, нервы и время.</p>
     <p><strong>Что умеет приложение:</strong></p>
@@ -306,31 +419,28 @@
 </div>
 
 <script>
-// ДОБАВЛЕН ТЕСТОВЫЙ БОСС (респавн 17 секунд)
 const BOSSES = [
-  { name: "Тест уведомлений Шрам", img: "https://cdn.r-2.online/image/monsters/371_IDLE.gif", respawn: 17 * 1000 },
-  { name: "Шрам",                img: "https://cdn.r-2.online/image/monsters/371_IDLE.gif" },
-  { name: "Чабон",               img: "https://cdn.r-2.online/image/monsters/389_IDLE.gif" },
-  { name: "Руум",                img: "https://cdn.r-2.online/image/monsters/364_IDLE.gif" },
-  { name: "Сирена",              img: "https://cdn.r-2.online/image/monsters/35_IDLE.gif" },
-  { name: "Флинд мечник",        img: "" },
-  { name: "Паук птицеед",        img: "https://cdn.r-2.online/image/monsters/365_IDLE.gif" },
-  { name: "Стальной жук",        img: "https://cdn.r-2.online/image/monsters/705_IDLE.gif" },
-  { name: "Огр воин",            img: "https://cdn.r-2.online/image/monsters/706_IDLE.gif" },
-  { name: "Минотавр воин",       img: "https://cdn.r-2.online/image/monsters/154_IDLE.gif" },
-  { name: "Лесной куролиск",     img: "https://cdn.r-2.online/image/monsters/361_IDLE.gif" },
-  { name: "Куру",                img: "https://cdn.r-2.online/image/monsters/360_IDLE.gif" },
-  { name: "Королева Мав",        img: "https://cdn.r-2.online/image/monsters/702_IDLE.gif" },
-  { name: "Командир кобольдов",  img: "https://cdn.r-2.online/image/monsters/362_IDLE.gif" },
-  { name: "Кобалло",             img: "https://cdn.r-2.online/image/monsters/578_IDLE.gif" },
-  { name: "Гигантский тритон",   img: "https://cdn.r-2.online/image/monsters/369_IDLE.gif" },
-  { name: "Гигантский Василиск", img: "https://cdn.r-2.online/image/monsters/703_IDLE.gif" },
-  { name: "Большой тролль воин", img: "https://cdn.r-2.online/image/monsters/579_IDLE.gif" },
-  { name: "Вождь гигантов",      img: "https://cdn.r-2.online/image/monsters/120_IDLE.gif" },
-  { name: "Крепкий скелет",      img: "https://cdn.r-2.online/image/monsters/359_IDLE.gif" },
-  { name: "Король Ракум",        img: "https://cdn.r-2.online/image/monsters/704_IDLE.gif" },
-  { name: "Нага-королева",       img: "https://cdn.r-2.online/image/monsters/1011_IDLE.gif" },
-  { name: "Королева гарпий",     img: "https://cdn.r-2.online/image/monsters/363_IDLE.gif" }
+  { name: "Шрам",                img: "https://cdn.r-2.online/image/monsters/371_IDLE.gif", cat: "mini" },
+  { name: "Чабон",               img: "https://cdn.r-2.online/image/monsters/389_IDLE.gif", cat: "mini" },
+  { name: "Руум",                img: "https://cdn.r-2.online/image/monsters/364_IDLE.gif", cat: "mini" },
+  { name: "Сирена",              img: "https://cdn.r-2.online/image/monsters/35_IDLE.gif", cat: "mini" },
+  { name: "Флинд мечник",        img: "", cat: "mini" },
+  { name: "Паук птицеед",        img: "https://cdn.r-2.online/image/monsters/365_IDLE.gif", cat: "mini" },
+  { name: "Стальной жук",        img: "https://cdn.r-2.online/image/monsters/705_IDLE.gif", cat: "mini" },
+  { name: "Огр воин",            img: "https://cdn.r-2.online/image/monsters/706_IDLE.gif", cat: "mini" },
+  { name: "Минотавр воин",       img: "https://cdn.r-2.online/image/monsters/154_IDLE.gif", cat: "mini" },
+  { name: "Лесной куролиск",     img: "https://cdn.r-2.online/image/monsters/361_IDLE.gif", cat: "mini" },
+  { name: "Куру",                img: "https://cdn.r-2.online/image/monsters/360_IDLE.gif", cat: "mini" },
+  { name: "Королева Мав",        img: "https://cdn.r-2.online/image/monsters/702_IDLE.gif", cat: "mini" },
+  { name: "Командир кобольдов",  img: "https://cdn.r-2.online/image/monsters/362_IDLE.gif", cat: "mini" },
+  { name: "Кобалло",             img: "https://cdn.r-2.online/image/monsters/578_IDLE.gif", cat: "mini" },
+  { name: "Гигантский тритон",   img: "https://cdn.r-2.online/image/monsters/369_IDLE.gif", cat: "mini" },
+  { name: "Гигантский Василиск", img: "https://cdn.r-2.online/image/monsters/703_IDLE.gif", cat: "mini" },
+  { name: "Большой тролль воин", img: "https://cdn.r-2.online/image/monsters/579_IDLE.gif", cat: "mini" },
+  { name: "Вождь гигантов",      img: "https://cdn.r-2.online/image/monsters/120_IDLE.gif", cat: "mini" },
+  { name: "Крепкий скелет",      img: "https://cdn.r-2.online/image/monsters/359_IDLE.gif", cat: "mini" },
+  { name: "Король Ракум",        img: "https://cdn.r-2.online/image/monsters/704_IDLE.gif", cat: "mini" },
+  { name: "Королева гарпий",     img: "https://cdn.r-2.online/image/monsters/363_IDLE.gif", cat: "mini" }
 ];
 
 const KEY_ICON_URL = "https://static.r2online.ru/wiki/icons/v2/item09/96_96_48.webp";
@@ -343,11 +453,14 @@ const STATS_KEY = "p2_boss_stats_v1";
 
 let timers = loadJSON(TIMERS_KEY, {});
 let farm = loadJSON(FARM_KEY, []);
-let settings = loadJSON(SETTINGS_KEY, { cols: 2, scale: 1, theme: "classic", device: "mobile" });
+let settings = loadJSON(SETTINGS_KEY, { cols: 2, scale: 1, theme: "classic", device: "mobile", minimal: false });
 let stats = loadJSON(STATS_KEY, { sessions: [], currentSession: null });
 
 if (stats.sessions) {
-  stats.sessions.forEach(s => { if (!s.drops) s.drops = []; });
+  stats.sessions.forEach(s => { if (!s.drops) s.drops = []; if (!s.totalKills) s.totalKills = s.drops.length; });
+}
+if (stats.currentSession && !stats.currentSession.totalKills) {
+  stats.currentSession.totalKills = 0;
 }
 
 let currentTab = "farm";
@@ -376,6 +489,7 @@ function applySettings() {
   if (settings.theme === "cronus") document.body.classList.add("theme-cronus");
   if (settings.theme === "pivoplay") document.body.classList.add("theme-pivoplay");
   if (settings.device === "pc") document.body.classList.add("device-pc");
+  if (settings.minimal) document.body.classList.add("minimal-mode");
   
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) {
@@ -414,17 +528,26 @@ function switchMainTab(tab) {
 
   const isFarm = tab === "farm";
   const isSettings = tab === "settings";
+  const isEdit = tab === "edit";
   
   document.getElementById("farmSubTabs").style.display = isFarm ? "flex" : "none";
   document.getElementById("farmControls").style.display = (isFarm && currentSubTab === "current") ? "flex" : "none";
   
-  document.getElementById("grid").style.display = (tab === "all" || tab === "edit" || (isFarm && currentSubTab === "current")) ? "grid" : "none";
+  const searchBar = document.getElementById("searchBar");
+  if (isEdit) {
+    searchBar.style.display = "block";
+  } else {
+    searchBar.style.display = "none";
+    document.getElementById("searchInput").value = "";
+  }
+
+  document.getElementById("gridContainer").style.display = (!isSettings && !(isFarm && currentSubTab === "stats")) ? "block" : "none";
   document.getElementById("statsView").style.display = (isFarm && currentSubTab === "stats") ? "flex" : "none";
   document.getElementById("settings").style.display = isSettings ? "flex" : "none";
   
   document.getElementById("footer").style.display = (isSettings || (isFarm && currentSubTab === "stats")) ? "none" : "block";
-  document.getElementById("saveBtn").style.display = (tab === "edit") ? "inline-block" : "none";
-  document.getElementById("resetBtn").style.display = (tab === "edit") ? "none" : "inline-block";
+  document.getElementById("saveBtn").style.display = isEdit ? "inline-block" : "none";
+  document.getElementById("resetBtn").style.display = isEdit ? "none" : "inline-block";
 
   clearInterval(tickInterval);
   clearInterval(sessionTimerInterval);
@@ -447,8 +570,6 @@ function switchSubTab(sub) {
   document.querySelectorAll(".sub-tab").forEach(t => t.classList.toggle("active", t.dataset.sub === sub));
   switchMainTab("farm");
 }
-
-const grid = document.getElementById("grid");
 
 function makeAvatar(boss) {
   const avatar = document.createElement("div");
@@ -591,14 +712,20 @@ function updateBossCard(el, i, now) {
 }
 
 function render() {
+  const container = document.getElementById("gridContainer");
+  container.innerHTML = "";
+  
   const now = Date.now();
-  grid.innerHTML = "";
+  const searchQuery = document.getElementById("searchInput").value.toLowerCase().trim();
 
-  let list;
-  if (currentTab === "all") {
-    list = BOSSES.map((_, i) => i);
-  } else if (currentTab === "farm") {
-    list = farm.slice();
+  if (currentTab === "farm") {
+    if (farm.length === 0) {
+      container.innerHTML = `<div class="empty">Пока пусто. Перейди в «Отслеживать» и отметь боссов для фарма.</div>`;
+      return;
+    }
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    let list = farm.slice();
     list.sort((a, b) => {
       const ta = getTimer(a), tb = getTimer(b);
       const la = ta ? ta.end - now : null; const lb = tb ? tb.end - now : null;
@@ -607,21 +734,60 @@ function render() {
       if (ga === 1) return la - lb;
       return a - b;
     });
-  } else {
-    list = BOSSES.map((_, i) => i);
-  }
+    list.forEach(i => {
+      const el = createBossCard(i);
+      el.dataset.state = ""; updateBossCard(el, i, now);
+      grid.appendChild(el);
+    });
+    container.appendChild(grid);
+  } 
+  else if (currentTab === "all" || currentTab === "edit") {
+    let miniBosses = BOSSES.map((b, i) => i).filter(i => BOSSES[i].cat === "mini");
+    let raidBosses = BOSSES.map((b, i) => i).filter(i => BOSSES[i].cat === "pit");
 
-  if (currentTab === "farm" && list.length === 0) {
-    const div = document.createElement("div");
-    div.className = "empty"; div.textContent = "Пока пусто. Перейди в «Выбрать» и отметь боссов для фарма.";
-    grid.appendChild(div); return;
-  }
+    if (searchQuery) {
+      miniBosses = miniBosses.filter(i => BOSSES[i].name.toLowerCase().includes(searchQuery));
+      raidBosses = raidBosses.filter(i => BOSSES[i].name.toLowerCase().includes(searchQuery));
+    }
 
-  list.forEach(i => {
-    const el = createBossCard(i);
-    if (currentTab !== "edit") { el.dataset.state = ""; updateBossCard(el, i, now); }
-    grid.appendChild(el);
-  });
+    if (searchQuery && miniBosses.length === 0 && raidBosses.length === 0) {
+      container.innerHTML = `<div class="empty" style="padding: 20px;">По запросу «${searchQuery}» ничего не найдено.</div>`;
+      return;
+    }
+
+    const titleMini = document.createElement("div");
+    titleMini.className = "category-title";
+    titleMini.textContent = "Мини-Питы";
+    container.appendChild(titleMini);
+    
+    const gridMini = document.createElement("div");
+    gridMini.className = "grid";
+    if (miniBosses.length === 0 && searchQuery) {
+       gridMini.innerHTML = `<div class="empty" style="padding: 10px; font-size: 12px;">Нет совпадений</div>`;
+    }
+    miniBosses.forEach(i => {
+      const el = createBossCard(i);
+      if (currentTab !== "edit") { el.dataset.state = ""; updateBossCard(el, i, now); }
+      gridMini.appendChild(el);
+    });
+    container.appendChild(gridMini);
+
+    const titlePit = document.createElement("div");
+    titlePit.className = "category-title empty-cat";
+    titlePit.textContent = "Питы (скоро)";
+    container.appendChild(titlePit);
+
+    if (raidBosses.length > 0) {
+      const gridPit = document.createElement("div");
+      gridPit.className = "grid";
+      raidBosses.forEach(i => {
+        const el = createBossCard(i);
+        if (currentTab !== "edit") { el.dataset.state = ""; updateBossCard(el, i, now); }
+        gridPit.appendChild(el);
+      });
+      container.appendChild(gridPit);
+    }
+  }
   
   updateFarmControlsUI();
 }
@@ -631,6 +797,9 @@ function tick() {
   const now = Date.now();
 
   if (currentTab === "farm") {
+    const grid = document.querySelector("#gridContainer .grid");
+    if (!grid) return;
+    
     let orderChanged = false;
     const currentOrder = [...grid.children].map(el => +el.dataset.index).filter(n => !isNaN(n));
     
@@ -656,12 +825,12 @@ function tick() {
         sorted.forEach(i => { if (map[i]) grid.appendChild(map[i]); });
       }
     }
-  }
 
-  [...grid.children].forEach(el => {
-    const i = +el.dataset.index; if (isNaN(i)) return;
-    updateBossCard(el, i, now);
-  });
+    [...grid.children].forEach(el => {
+      const i = +el.dataset.index; if (isNaN(i)) return;
+      updateBossCard(el, i, now);
+    });
+  }
 }
 
 function toggleSelect(i) {
@@ -672,7 +841,7 @@ function toggleSelect(i) {
 
 function saveSelection() { saveFarm(); switchMainTab("farm"); }
 
-function startBoss(i, force = false) {
+function startBoss(i, force = false, isKey = false) {
   const now = Date.now();
   const t = getTimer(i);
   if (!force && t && t.end > now) return;
@@ -680,8 +849,24 @@ function startBoss(i, force = false) {
   const respawnTime = BOSSES[i].respawn || DEFAULT_RESPAWN;
   timers[i] = { end: now + respawnTime, killedAt: now };
   
+  if (stats.currentSession) {
+    if (!stats.currentSession.totalKills) stats.currentSession.totalKills = 0;
+    stats.currentSession.totalKills += 1;
+    
+    if (isKey) {
+      stats.currentSession.keys += 1;
+      if (!stats.currentSession.drops) stats.currentSession.drops = [];
+      stats.currentSession.drops.push({
+        bossName: BOSSES[i].name,
+        time: now,
+        elapsed: now - stats.currentSession.startTime
+      });
+    }
+    saveStats();
+  }
+
   saveTimers();
-  const el = grid.querySelector(`[data-index="${i}"]`);
+  const el = document.querySelector(`#gridContainer [data-index="${i}"]`);
   if (el) { el.dataset.state = ""; el.dataset.notified = ""; el.dataset.notified15s = ""; }
   if (navigator.vibrate) navigator.vibrate(30);
   render();
@@ -689,7 +874,7 @@ function startBoss(i, force = false) {
 
 function resetBoss(i) {
   delete timers[i]; saveTimers();
-  const el = grid.querySelector(`[data-index="${i}"]`);
+  const el = document.querySelector(`#gridContainer [data-index="${i}"]`);
   if (el) { el.dataset.state = ""; el.dataset.notified = ""; el.dataset.notified15s = ""; }
   render();
 }
@@ -764,6 +949,7 @@ function toggleFarmSession() {
       endTime: now,
       duration: duration,
       keys: stats.currentSession.keys,
+      totalKills: stats.currentSession.totalKills || 0,
       drops: stats.currentSession.drops || []
     });
     stats.currentSession = null;
@@ -772,7 +958,7 @@ function toggleFarmSession() {
     switchSubTab("stats");
     render();
   } else {
-    stats.currentSession = { startTime: Date.now(), keys: 0, drops: [] };
+    stats.currentSession = { startTime: Date.now(), keys: 0, totalKills: 0, drops: [] };
     saveStats();
     render();
     startSessionTimer();
@@ -787,17 +973,8 @@ function collectKey(i) {
   
   if (t && t.end > now) return;
 
-  stats.currentSession.keys += 1;
+  startBoss(i, false, true);
   
-  if (!stats.currentSession.drops) stats.currentSession.drops = [];
-  stats.currentSession.drops.push({
-    bossName: BOSSES[i].name,
-    time: now,
-    elapsed: now - stats.currentSession.startTime
-  });
-  
-  saveStats();
-  startBoss(i);
   if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
 }
 
@@ -822,7 +999,7 @@ function updateFarmControlsUI() {
     const m = Math.floor((duration % 3600000) / 60000);
     const s = Math.floor((duration % 60000) / 1000);
     
-    statusText.textContent = `Фарм идёт. Ключей: ${stats.currentSession.keys}`;
+    statusText.textContent = `Фарм идёт. Ключей: ${stats.currentSession.keys} | Убито: ${stats.currentSession.totalKills || 0}`;
     timerText.textContent = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
     btn.textContent = "Завершить фарм";
     btn.className = "btn-farm stop";
@@ -837,8 +1014,13 @@ function updateFarmControlsUI() {
 function renderStats() {
   const container = document.getElementById("statsView");
   const totalKeys = stats.sessions.reduce((sum, s) => sum + s.keys, 0) + (stats.currentSession ? stats.currentSession.keys : 0);
+  const totalKills = stats.sessions.reduce((sum, s) => sum + (s.totalKills || 0), 0) + (stats.currentSession ? (stats.currentSession.totalKills || 0) : 0);
   
   let html = `
+    <div class="stat-card">
+      <h3>Всего убито боссов</h3>
+      <div class="val">${totalKills}</div>
+    </div>
     <div class="stat-card">
       <h3>Всего выбито ключей</h3>
       <div class="val">${totalKeys}</div>
@@ -853,7 +1035,7 @@ function renderStats() {
     html += `
       <div class="stat-card" style="border-color: var(--accent);">
         <h3>Текущая сессия</h3>
-        <div class="val" style="color: #4ade80;">${stats.currentSession.keys} ключей</div>
+        <div class="val" style="color: #4ade80; font-size: 20px;">${stats.currentSession.totalKills || 0} убито / ${stats.currentSession.keys} ключей</div>
       </div>
     `;
   }
@@ -871,8 +1053,11 @@ function renderStats() {
             <div>${fmtDate(s.startTime)}</div>
             <div class="date">Длительность: ${fmtDuration(s.duration)}</div>
           </div>
-          <div style="display:flex; align-items:center;">
-            <div class="keys">${s.keys} 🗝️</div>
+          <div style="display:flex; align-items:center; gap: 12px;">
+            <div style="font-size: 12px; color: var(--text-muted); text-align: right;">
+              Убито: <strong style="color: var(--text-color);">${s.totalKills || 0}</strong><br>
+              Ключей: <strong style="color: var(--accent);">${s.keys}</strong>
+            </div>
             <div class="arrow">›</div>
           </div>
         </div>
@@ -898,14 +1083,16 @@ function openSessionDetails(idx) {
   
   const body = document.getElementById("sessionModalBody");
   
+  let html = `<div style="font-size: 13px; margin-bottom: 12px; color: var(--text-muted);">
+    Всего убито боссов: <strong style="color: var(--text-color);">${s.totalKills || 0}</strong><br>
+    Выбито ключей: <strong style="color: var(--accent);">${s.keys}</strong><br>
+    Время сессии: <strong>${fmtDuration(s.duration)}</strong>
+  </div>`;
+
   if (!s.drops || s.drops.length === 0) {
-    body.innerHTML = `<div class="empty" style="padding: 20px;">Для этой сессии детали дропа не сохранились (старая версия).</div>`;
+    html += `<div class="empty" style="padding: 20px;">Логов выпадения ключей нет.</div>`;
   } else {
-    let html = `<div style="font-size: 13px; margin-bottom: 12px; color: var(--text-muted);">
-      Всего убито боссов с лутом: <strong style="color: var(--accent);">${s.drops.length}</strong><br>
-      Время сессии: <strong>${fmtDuration(s.duration)}</strong>
-    </div>`;
-    
+    html += `<h3 style="margin-top: 16px; font-size: 14px; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); padding-bottom: 6px;">Лог ключей</h3>`;
     html += `<div class="drop-list">`;
     s.drops.forEach(d => {
       const mins = Math.floor(d.elapsed / 60000);
@@ -928,10 +1115,9 @@ function openSessionDetails(idx) {
       `;
     });
     html += `</div>`;
-    
-    body.innerHTML = html;
   }
-
+  
+  body.innerHTML = html;
   document.getElementById("sessionModal").classList.add("show");
 }
 
@@ -940,7 +1126,7 @@ function closeSessionModal() {
 }
 
 function clearStats() {
-  if (!confirm("Удалить всю историю и счетчики ключей?")) return;
+  if (!confirm("Удалить всю историю и счетчики?")) return;
   stats = { sessions: [], currentSession: null };
   saveStats();
   renderStats();
@@ -961,7 +1147,7 @@ function renderSettings() {
         ${notifPerm === 'denied' ? '⚠️ Уведомления заблокированы. Разрешите их в настройках браузера (иконка замка).' : ''}
         ${notifPerm === 'default' ? 'Включите, чтобы получать системные уведомления.' : ''}
       </div>
-      ${notifPerm === 'default' ? `<button class="reset-settings" onclick="requestNotificationPermission()" style="background: var(--accent); color: var(--bg-color); margin-bottom: 8px;">Включить уведомления</button>` : ''}
+      ${notifPerm === 'default' ? `<button class="reset-settings btn-notify-enable" onclick="requestNotificationPermission()" style="margin-bottom: 8px;">Включить уведомления</button>` : ''}
     </div>
 
     <div class="setting-block">
@@ -970,6 +1156,14 @@ function renderSettings() {
         <button data-device="mobile" class="${!isPC ? 'active' : ''}">📱 Телефон</button>
         <button data-device="pc" class="${isPC ? 'active' : ''}">💻 ПК</button>
       </div>
+    </div>
+
+    <div class="setting-block">
+      <label class="title">🖼️ Отображение</label>
+      <div class="picker-grid">
+        <button onclick="toggleMinimal()" class="${settings.minimal ? 'active' : ''}" style="grid-column: span 2;">${settings.minimal ? 'Минималистичный (вкл)' : 'Стандартный (вкл)'}</button>
+      </div>
+      <div class="hint">Минималистичный режим скрывает картинки боссов, оставляя только названия и таймеры.</div>
     </div>
 
     <div class="setting-block">
@@ -1021,8 +1215,15 @@ function renderSettings() {
   range.addEventListener("change", () => saveSettings());
 }
 
+function toggleMinimal() {
+  settings.minimal = !settings.minimal;
+  saveSettings();
+  applySettings();
+  renderSettings();
+}
+
 function resetSettings() {
-  settings = { cols: 2, scale: 1, theme: "classic", device: "mobile" };
+  settings = { cols: 2, scale: 1, theme: "classic", device: "mobile", minimal: false };
   saveSettings(); applySettings(); renderSettings();
 }
 
