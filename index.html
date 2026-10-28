@@ -235,7 +235,7 @@
 
 <div class="app-container">
   <h1>
-    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.7.1</span>
+    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.8.0</span>
     <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
   </h1>
 
@@ -306,7 +306,9 @@
 </div>
 
 <script>
+// ДОБАВЛЕН ТЕСТОВЫЙ БОСС (респавн 17 секунд)
 const BOSSES = [
+  { name: "Тест уведомлений Шрам", img: "https://cdn.r-2.online/image/monsters/371_IDLE.gif", respawn: 17 * 1000 },
   { name: "Шрам",                img: "https://cdn.r-2.online/image/monsters/371_IDLE.gif" },
   { name: "Чабон",               img: "https://cdn.r-2.online/image/monsters/389_IDLE.gif" },
   { name: "Руум",                img: "https://cdn.r-2.online/image/monsters/364_IDLE.gif" },
@@ -332,7 +334,7 @@ const BOSSES = [
 ];
 
 const KEY_ICON_URL = "https://static.r2online.ru/wiki/icons/v2/item09/96_96_48.webp";
-const RESPAWN_MS = 20 * 60 * 1000;
+const DEFAULT_RESPAWN = 20 * 60 * 1000;
 const TIMERS_KEY = "p2_boss_timers_v1";
 const FARM_KEY = "p2_boss_farm_v1";
 const SETTINGS_KEY = "p2_boss_settings_v1";
@@ -402,7 +404,7 @@ function fmtDuration(ms) {
 function getTimer(i) {
   const t = timers[i];
   if (!t) return null;
-  if (typeof t === "number") return { end: t, killedAt: t - RESPAWN_MS };
+  if (typeof t === "number") return { end: t, killedAt: t - (BOSSES[i].respawn || DEFAULT_RESPAWN) };
   return t;
 }
 
@@ -674,7 +676,10 @@ function startBoss(i, force = false) {
   const now = Date.now();
   const t = getTimer(i);
   if (!force && t && t.end > now) return;
-  timers[i] = { end: now + RESPAWN_MS, killedAt: now };
+  
+  const respawnTime = BOSSES[i].respawn || DEFAULT_RESPAWN;
+  timers[i] = { end: now + respawnTime, killedAt: now };
+  
   saveTimers();
   const el = grid.querySelector(`[data-index="${i}"]`);
   if (el) { el.dataset.state = ""; el.dataset.notified = ""; el.dataset.notified15s = ""; }
@@ -729,46 +734,6 @@ function notifyReady(name, bossIndex) {
   } catch {}
   
   showNotification(`🟢 ${name} заспавнился!`, 'Нажми на уведомление, чтобы отметить убийство.', bossIndex, 'ready');
-}
-
-function testNotificationGeneric(callback) {
-  if (!("Notification" in window)) {
-    alert("Браузер не поддерживает уведомления.");
-    return;
-  }
-  
-  if (Notification.permission === "granted") {
-    callback();
-  } else if (Notification.permission !== "denied") {
-    Notification.requestPermission().then(permission => {
-      if (permission === "granted") {
-        renderSettings();
-        callback();
-      } else {
-        alert("Уведомления заблокированы. Разрешите их в настройках браузера (иконка замка).");
-      }
-    });
-  } else {
-    alert("Уведомления заблокированы. Разрешите их в настройках браузера (иконка замка).");
-  }
-}
-
-function testNotification() {
-  testNotificationGeneric(() => {
-    alert("Тестовое уведомление появится через 5 секунд. Можете свернуть браузер!");
-    setTimeout(() => {
-      showNotification("🔔 Тест уведомлений", "Если вы видите это сообщение, уведомления работают!", -1, 'test');
-    }, 5000);
-  });
-}
-
-function testBossNotification() {
-  testNotificationGeneric(() => {
-    alert("Тестовое уведомление о боссе появится через 3 секунды. Можете свернуть браузер!");
-    setTimeout(() => {
-      showNotification("⏱ Шрам респавнится!", "Осталось 15 секунд до появления.", -1, 'test-boss');
-    }, 3000);
-  });
 }
 
 function requestNotificationPermission() {
@@ -997,8 +962,6 @@ function renderSettings() {
         ${notifPerm === 'default' ? 'Включите, чтобы получать системные уведомления.' : ''}
       </div>
       ${notifPerm === 'default' ? `<button class="reset-settings" onclick="requestNotificationPermission()" style="background: var(--accent); color: var(--bg-color); margin-bottom: 8px;">Включить уведомления</button>` : ''}
-      <button class="reset-settings" onclick="testNotification()" style="background: var(--panel-border); margin-bottom: 8px;">⏱ Тест оповещения (через 5 сек)</button>
-      <button class="reset-settings" onclick="testBossNotification()" style="background: var(--panel-border);">👹 Тест: Босс респавнится</button>
     </div>
 
     <div class="setting-block">
