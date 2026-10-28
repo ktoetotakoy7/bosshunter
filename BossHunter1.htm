@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080c14">
+<title>Таймеры боссов P2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --cols: 2;
+    --scale: 1;
+    --max-width: 100%;
+    --body-padding: 12px;
+    
+    --bg-color: #1a1a2e;
+    --panel-bg: #16213e;
+    --panel-border: #0f3460;
+    --text-color: #eee;
+    --text-muted: #8899aa;
+    --accent: #e94560;
+    --btn-kill: #e94560;
+    --btn-reset: #3a4a6a;
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --border-radius: 12px;
+    --clip-path: none;
+    --metal-gradient: none;
+  }
+
+  body.theme-cronus {
+    --bg-color: #05070a;
+    --panel-bg: rgba(13, 17, 26, 0.95);
+    --panel-border: #2a3245;
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #d4af37;
+    --btn-kill: #2a2418;
+    --btn-reset: #1e293b;
+    --font-main: 'Tektur', sans-serif;
+    --border-radius: 0px; 
+    --clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    --metal-gradient: linear-gradient(180deg, #e2e8f0 0%, #94a3b8 100%);
+  }
+
+  body.theme-pivoplay {
+    --bg-color: #140e08;
+    --panel-bg: rgba(46, 26, 11, 0.9);
+    --panel-border: #5c3817;
+    --text-color: #fff4e6;
+    --text-muted: #c4a582;
+    --accent: #f5a623;
+    --btn-kill: #6b3e12; 
+    --btn-reset: #3d2208;
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --border-radius: 12px;
+    --clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    --metal-gradient: linear-gradient(180deg, #f9d77e 0%, #e69d20 100%);
+  }
+
+  body.device-pc { --max-width: 1400px; --body-padding: 20px; }
+
+  body {
+    font-family: var(--font-main);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: var(--body-padding);
+    min-height: 100vh;
+    padding-bottom: 80px;
+    transition: background 0.3s, color 0.3s;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  body.theme-cronus::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 100%, rgba(180, 30, 30, 0.3) 0%, transparent 60%), radial-gradient(ellipse at 10% 50%, rgba(30, 60, 120, 0.2) 0%, transparent 50%), #05070a; pointer-events: none; z-index: -1; }
+  body.theme-pivoplay::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 0%, rgba(245, 166, 35, 0.1) 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, rgba(107, 62, 18, 0.3) 0%, transparent 70%), #140e08; pointer-events: none; z-index: -1; }
+
+  .app-container { width: 100%; max-width: var(--max-width); display: flex; flex-direction: column; }
+
+  h1 { font-size: 18px; text-align: center; margin-bottom: 10px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+  body.theme-cronus h1 { font-size: 22px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 0 5px rgba(212, 175, 55, 0.3); }
+  body.theme-pivoplay h1 { font-size: 22px; font-weight: 800; color: #fff4e6; text-shadow: 0 0 15px rgba(245, 166, 35, 0.6), 0 0 5px rgba(245, 166, 35, 0.4); }
+  body.theme-cronus h1 span, body.theme-pivoplay h1 span { color: var(--accent) !important; text-shadow: 0 0 8px rgba(255, 255, 255, 0.5); }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 12px; background: var(--panel-bg); padding: 4px; border-radius: var(--border-radius); border: 1px solid var(--panel-border); clip-path: var(--clip-path); }
+  body.theme-cronus .tabs { border: 1px solid rgba(255, 255, 255, 0.1); }
+  body.theme-pivoplay .tabs { border: 1px solid rgba(245, 166, 35, 0.2); }
+  
+  .tab { flex: 1; padding: 10px 4px; text-align: center; border-radius: var(--border-radius); font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: all 0.15s; text-transform: uppercase; user-select: none; }
+  .tab.active { background: var(--accent); color: var(--bg-color); }
+  body.theme-cronus .tab.active { background: var(--metal-gradient); color: #05070a; text-shadow: 0 1px 1px rgba(255,255,255,0.5); }
+  body.theme-pivoplay .tab.active { background: var(--metal-gradient); color: #140e08; text-shadow: 0 1px 1px rgba(255,255,255,0.4); }
+
+  .sub-tabs { display: flex; gap: 4px; margin-bottom: 12px; padding: 0 4px; }
+  .sub-tab { flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; background: rgba(0,0,0,0.2); transition: 0.2s; text-transform: uppercase; }
+  .sub-tab.active { background: var(--panel-border); color: var(--text-color); box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
+  body.theme-cronus .sub-tab.active { background: #3a3020; color: #fff; }
+  body.theme-pivoplay .sub-tab.active { background: #5c3817; color: #fff4e6; }
+
+  .farm-controls { display: flex; justify-content: space-between; align-items: center; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); padding: 10px 16px; margin-bottom: 12px; clip-path: var(--clip-path); }
+  .farm-status { display: flex; flex-direction: column; gap: 2px; }
+  .farm-status span { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+  .farm-status strong { font-size: 18px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  
+  .btn-farm { background: var(--accent); color: var(--bg-color); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; font-family: var(--font-main); transition: filter 0.2s; }
+  body.theme-cronus .btn-farm { background: var(--metal-gradient); color: #05070a; border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+  body.theme-pivoplay .btn-farm { background: var(--metal-gradient); color: #140e08; border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+  .btn-farm.active { background: #4ade80; color: #000; border-radius: 8px; clip-path: none; }
+  .btn-farm.stop { background: #e94560; color: #fff; border-radius: 8px; clip-path: none; }
+  .btn-farm:active { filter: brightness(1.2); }
+
+  .grid { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: calc(10px * var(--scale)); }
+  body.device-pc .grid { gap: 12px; }
+
+  .boss { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); clip-path: var(--clip-path); padding: max(calc(8px * var(--scale)), 2px); text-align: center; user-select: none; display: flex; flex-direction: column; align-items: center; gap: max(calc(4px * var(--scale)), 1px); position: relative; overflow: hidden; touch-action: pan-y; }
+  body.theme-cronus .boss { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6); border: 1px solid #3a3020; }
+  body.theme-pivoplay .boss { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); border: 1px solid #5c3817; }
+
+  .btn-key {
+    position: absolute; top: 4px; right: 4px; width: 32px; height: 32px;
+    background: #d4af37; border: 2px solid #fff; border-radius: 50%;
+    display: none; align-items: center; justify-content: center; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 5; transition: transform 0.1s;
+    padding: 4px;
+  }
+  .btn-key img { width: 100%; height: 100%; object-fit: contain; }
+  .btn-key:active { transform: scale(0.85); }
+  .btn-key.disabled { filter: grayscale(1) opacity(0.4); cursor: not-allowed; pointer-events: none; border-color: #888; background: #555; }
+  .btn-key.show { display: flex; }
+
+  .boss .avatar { width: 100%; aspect-ratio: 1 / 1; border-radius: max(calc(8px * var(--scale)), 2px); overflow: hidden; background: #0f1a30; display: flex; align-items: center; justify-content: center; position: relative; pointer-events: none; border: 1px solid transparent; }
+  body.theme-cronus .boss .avatar { border-color: #2a3245; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
+  body.theme-pivoplay .boss .avatar { border-color: #5c3817; background: #1a1008; clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
+  .boss .avatar img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .boss .avatar .placeholder { font-size: calc(32px * var(--scale)); font-weight: 700; color: var(--panel-border); }
+  body.theme-pivoplay .boss .avatar .placeholder { color: #5c3817; }
+
+  .boss .name { font-size: max(calc(13px * var(--scale)), 9px); font-weight: 700; line-height: 1.2; color: var(--text-color); min-height: calc(28px * var(--scale)); display: flex; align-items: center; justify-content: center; text-align: center; pointer-events: none; text-transform: uppercase; word-break: break-word; }
+  body.theme-cronus .boss .name, body.theme-pivoplay .boss .name { color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+  .boss .killed-at, .boss .respawn-at { font-size: max(calc(11px * var(--scale)), 8px); line-height: 1.2; color: var(--text-muted); font-variant-numeric: tabular-nums; pointer-events: none; min-height: calc(12px * var(--scale)); white-space: nowrap; }
+  body.theme-cronus .boss .killed-at { color: #a87a8a; } body.theme-cronus .boss .respawn-at { color: #7a9aa8; }
+  body.theme-pivoplay .boss .killed-at { color: #c4a582; } body.theme-pivoplay .boss .respawn-at { color: #a87a4a; }
+
+  .boss .status { font-size: max(calc(13px * var(--scale)), 9px); color: var(--text-muted); font-variant-numeric: tabular-nums; pointer-events: none; min-height: calc(18px * var(--scale)); white-space: nowrap; }
+  
+  .boss.running { border-color: var(--accent); background: var(--bg-color); }
+  body.theme-cronus .boss.running { border-color: #d4af37; } body.theme-pivoplay .boss.running { border-color: #f5a623; }
+  .boss.running .status { color: #ffb347; font-size: max(calc(22px * var(--scale)), 11px); font-weight: 700; }
+  body.theme-cronus .boss.running .status { color: #d4af37; } body.theme-pivoplay .boss.running .status { color: #f5a623; }
+
+  .boss.ready { border-color: #4ade80; background: #1a3a2a; }
+  body.theme-cronus .boss.ready { background: rgba(20, 50, 30, 0.8); } body.theme-pivoplay .boss.ready { background: rgba(20, 50, 30, 0.6); }
+  .boss.ready .status { color: #4ade80; font-size: max(calc(16px * var(--scale)), 10px); font-weight: 700; }
+
+  .actions { display: flex; flex-direction: column; gap: max(calc(4px * var(--scale)), 1px); width: 100%; margin-top: max(calc(4px * var(--scale)), 1px); }
+  .actions.row { flex-direction: row; }
+  .actions button { flex: 1; border: 1px solid transparent; border-radius: max(calc(8px * var(--scale)), 2px); padding: max(calc(8px * var(--scale)), 2px) max(calc(4px * var(--scale)), 1px); font-size: max(calc(11px * var(--scale)), 8px); font-weight: 700; cursor: pointer; transition: filter 0.1s, transform 0.1s; color: #fff; touch-action: manipulation; min-height: max(calc(36px * var(--scale)), 18px); font-family: var(--font-main); text-transform: uppercase; }
+  body.theme-cronus .actions button { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); border: 1px solid rgba(255,255,255,0.1); }
+  body.theme-pivoplay .actions button { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); border: 1px solid rgba(255,255,255,0.1); }
+  .actions button:active { filter: brightness(1.3); transform: scale(0.97); }
+  .btn-kill { background: var(--btn-kill); } .btn-reset { background: var(--btn-reset); color: var(--text-color); }
+  body.theme-cronus .btn-kill { background: #2a2418; border-color: #6b5a3e; color: #e2cfa0; text-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
+  body.theme-pivoplay .btn-kill { background: #6b3e12; border-color: #a86b2a; color: #fff4e6; }
+  body.theme-cronus .btn-reset { background: #1e293b; border-color: #4a5a75; }
+  body.theme-pivoplay .btn-reset { background: #3d2208; border-color: #6b4623; color: #e8d4b8; }
+
+  .boss.selectable { cursor: pointer; } .boss.selected { border-color: #4ade80; background: #1a3a2a; }
+  body.theme-cronus .boss.selected { background: rgba(20, 50, 30, 0.8); } body.theme-pivoplay .boss.selected { background: rgba(20, 50, 30, 0.6); }
+  .boss.selected::after { content: "✓"; position: absolute; top: calc(6px * var(--scale)); right: calc(8px * var(--scale)); color: #4ade80; font-weight: 700; font-size: calc(18px * var(--scale)); text-shadow: 0 0 4px #000; pointer-events: none; }
+  .boss.not-selected { opacity: 0.4; }
+
+  .empty { text-align: center; color: var(--text-muted); padding: 40px 20px; font-size: 14px; grid-column: 1 / -1; }
+
+  .stats-container { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+  .stat-card { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); padding: 16px; display: flex; align-items: center; justify-content: space-between; clip-path: var(--clip-path); }
+  .stat-card h3 { font-size: 14px; color: var(--text-muted); text-transform: uppercase; margin: 0; }
+  .stat-card .val { font-size: 28px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .session-list { display: flex; flex-direction: column; gap: 8px; }
+  
+  .session-item { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; cursor: pointer; transition: border-color 0.2s, background 0.2s; clip-path: var(--clip-path); }
+  body.theme-cronus .session-item { border-radius: 0; }
+  body.theme-pivoplay .session-item { border-radius: 0; }
+  
+  .session-item:hover { border-color: var(--accent); background: rgba(255,255,255,0.05); }
+  .session-item .date { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+  .session-item .keys { font-weight: 700; color: var(--accent); font-size: 16px; }
+  .session-item .arrow { color: var(--text-muted); font-size: 18px; margin-left: 8px; }
+
+  .settings { display: flex; flex-direction: column; gap: 16px; padding: 10px 4px; width: 100%; }
+  .setting-block { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); clip-path: var(--clip-path); padding: 16px; }
+  .setting-block label.title { display: block; font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .setting-block .hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+  
+  .picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .picker-grid.themes-3 { grid-template-columns: repeat(3, 1fr); }
+  .picker-grid.cols-8 { grid-template-columns: repeat(4, 1fr); }
+  .picker-grid button { padding: 12px 8px; border-radius: var(--border-radius); border: 1px solid var(--panel-border); background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: var(--font-main); text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  body.theme-cronus .picker-grid button, body.theme-pivoplay .picker-grid button { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+  .picker-grid button.active { border-color: var(--accent); color: var(--accent); background: rgba(184, 156, 90, 0.1); }
+  body.theme-cronus .picker-grid button.active { background: var(--metal-gradient); color: #05070a; border: none; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+  body.theme-pivoplay .picker-grid button.active { background: var(--metal-gradient); color: #140e08; border: none; }
+  
+  .scale-row { display: flex; align-items: center; gap: 12px; }
+  .scale-row input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 6px; background: var(--panel-border); border-radius: 3px; outline: none; }
+  .scale-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: var(--accent); border-radius: 50%; cursor: pointer; }
+  body.theme-cronus .scale-row input[type="range"]::-webkit-slider-thumb { background: #d4af37; border-radius: 2px; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
+  body.theme-pivoplay .scale-row input[type="range"]::-webkit-slider-thumb { background: #f5a623; border-radius: 2px; box-shadow: 0 0 10px rgba(245, 166, 35, 0.5); clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
+  .scale-value { font-size: 14px; font-weight: 700; color: var(--accent); min-width: 50px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .reset-settings { background: var(--btn-reset); color: var(--text-color); border: 1px solid var(--panel-border); padding: 12px 20px; border-radius: var(--border-radius); font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; touch-action: manipulation; font-family: var(--font-main); text-transform: uppercase; }
+  body.theme-cronus .reset-settings { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); background: linear-gradient(180deg, #2a3648 0%, #141b26 100%); border-color: #4a5a75; }
+  body.theme-pivoplay .reset-settings { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); background: linear-gradient(180deg, #4a301c 0%, #26170a 100%); border-color: #6b4623; color: #e8d4b8; }
+
+  .footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-color); padding: 10px 12px; text-align: center; border-top: 1px solid var(--panel-border); z-index: 10; }
+  body.theme-cronus .footer { background: rgba(5, 7, 10, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.1); }
+  body.theme-pivoplay .footer { background: rgba(20, 14, 8, 0.95); border-top: 1px solid rgba(245, 166, 35, 0.2); }
+  body.device-pc .footer { position: relative; background: transparent; border: none; padding: 20px 0; margin-top: 10px; }
+  .footer button { background: var(--panel-bg); color: var(--text-color); border: 1px solid var(--panel-border); padding: 10px 18px; border-radius: var(--border-radius); font-size: 13px; margin: 0 4px; cursor: pointer; font-weight: 600; font-family: var(--font-main); text-transform: uppercase; }
+  body.theme-cronus .footer button { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); background: linear-gradient(180deg, #2a3648 0%, #141b26 100%); border-color: #4a5a75; }
+  body.theme-pivoplay .footer button { border-radius: 0; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); background: linear-gradient(180deg, #4a301c 0%, #26170a 100%); border-color: #6b4623; color: #e8d4b8; }
+  .footer button.primary { background: var(--accent); color: var(--bg-color); border: none; }
+  body.theme-cronus .footer button.primary { background: var(--metal-gradient); color: #05070a; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+  body.theme-pivoplay .footer button.primary { background: var(--metal-gradient); color: #140e08; }
+
+  .session-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+  .session-modal.show { opacity: 1; pointer-events: auto; }
+  .session-modal-content { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); clip-path: var(--clip-path); max-width: 500px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 0.3s ease; }
+  .session-modal.show .session-modal-content { transform: translateY(0); }
+  .session-modal-close { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; line-height: 1; }
+  .session-modal-close:hover { color: var(--accent); }
+  .session-modal h2 { font-size: 18px; color: var(--accent); margin-bottom: 16px; text-align: center; }
+  
+  .drop-list { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; }
+  .drop-item { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 13px; }
+  body.theme-cronus .drop-item { border-radius: 0; }
+  body.theme-pivoplay .drop-item { border-radius: 0; }
+  .drop-item .boss-name { font-weight: 700; color: var(--text-color); }
+  .drop-item .time-info { font-size: 11px; color: var(--text-muted); text-align: right; }
+  .drop-item .key-icon { width: 20px; height: 20px; margin-right: 8px; }
+  .drop-item .left-part { display: flex; align-items: center; }
+
+  .welcome-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+  .welcome-modal.show { opacity: 1; pointer-events: auto; }
+  .welcome-content { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); clip-path: var(--clip-path); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 30px 24px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateY(20px); transition: transform 0.3s ease; }
+  .welcome-modal.show .welcome-content { transform: translateY(0); }
+  .welcome-close { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; line-height: 1; }
+  .welcome-close:hover { color: var(--accent); }
+  .welcome-content h2 { font-size: 20px; color: var(--accent); margin-bottom: 16px; text-align: center; line-height: 1.3; }
+  .welcome-content p { font-size: 14px; line-height: 1.5; color: var(--text-color); margin-bottom: 16px; }
+  .welcome-content p.intro { font-weight: 600; font-size: 15px; color: var(--accent); text-align: center; margin-bottom: 20px; }
+  .welcome-content ul { list-style: none; padding: 0; margin-bottom: 20px; }
+  .welcome-content ul li { font-size: 13px; line-height: 1.5; margin-bottom: 8px; padding-left: 20px; position: relative; }
+  .welcome-content ul li::before { content: "•"; position: absolute; left: 0; color: var(--accent); font-size: 16px; }
+  .welcome-content ol { margin-bottom: 20px; padding-left: 20px; }
+  .welcome-content ol li { font-size: 13px; line-height: 1.5; margin-bottom: 6px; }
+  .welcome-content ol li strong { color: var(--accent); }
+  .welcome-content .divider { height: 1px; background: var(--panel-border); margin: 20px 0; }
+  .welcome-content .thanks-text { font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.5; font-style: italic; }
+  .welcome-content .thanks-text a { color: var(--accent); text-decoration: none; font-weight: bold; }
+  .welcome-btn { display: block; width: 100%; padding: 16px; margin-top: 24px; background: var(--accent); color: var(--bg-color); border: none; border-radius: var(--border-radius); font-size: 16px; font-weight: 700; cursor: pointer; text-transform: uppercase; font-family: var(--font-main); }
+  body.theme-cronus .welcome-btn { background: var(--metal-gradient); color: #05070a; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+  body.theme-pivoplay .welcome-btn { background: var(--metal-gradient); color: #140e08; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+</style>
+</head>
+<body class="">
+
+<div class="app-container">
+  <h1>
+    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.5</span>
+    <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
+  </h1>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="farm" onclick="switchMainTab('farm')">📋 Фарм</div>
+    <div class="tab" data-tab="all" onclick="switchMainTab('all')">🗂 Все</div>
+    <div class="tab" data-tab="edit" onclick="switchMainTab('edit')">☑️ Выбрать</div>
+    <div class="tab" data-tab="settings" onclick="switchMainTab('settings')">⚙️</div>
+  </div>
+
+  <div class="sub-tabs" id="farmSubTabs" style="display:flex;">
+    <div class="sub-tab active" data-sub="current" onclick="switchSubTab('current')">Текущий</div>
+    <div class="sub-tab" data-sub="stats" onclick="switchSubTab('stats')">Статистика</div>
+  </div>
+
+  <div id="farmControls" class="farm-controls" style="display:none;">
+    <div class="farm-status">
+      <span id="farmStatusText">Фарм не запущен</span>
+      <strong id="farmStatusTimer">00:00:00</strong>
+    </div>
+    <button id="farmBtn" class="btn-farm" onclick="toggleFarmSession()">Начать фарм</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="stats-container" id="statsView" style="display:none;"></div>
+  <div class="settings" id="settings" style="display:none;"></div>
+
+  <div class="footer" id="footer" style="display:none;">
+    <button id="resetBtn" onclick="resetAll()">Сбросить все таймеры</button>
+    <button id="saveBtn" class="primary" onclick="saveSelection()" style="display:none;">Сохранить выбор</button>
+  </div>
+</div>
+
+<div class="session-modal" id="sessionModal">
+  <div class="session-modal-content">
+    <button class="session-modal-close" onclick="closeSessionModal()">✕</button>
+    <h2 id="sessionModalTitle">Детали фарма</h2>
+    <div id="sessionModalBody"></div>
+  </div>
+</div>
+
+<div class="welcome-modal" id="welcomeModal">
+  <div class="welcome-content">
+    <button class="welcome-close" onclick="closeWelcome()">✕</button>
+    <h2>🛡️ Добро пожаловать в таймеры боссов R2 Cronus!</h2>
+    
+    <p class="intro">У тебя есть кольцо телепортации или гигантский запас рун ТП? Это приложение для тебя! =)</p>
+    
+    <p>Хватит бегать по всей карте впустую, надеясь, что босс уже реснулся. Теперь весь фарм под контролем. Наш инструмент создан, чтобы экономить твои руны, нервы и время.</p>
+    
+    <p><strong>Что умеет приложение:</strong></p>
+    <ul>
+      <li><strong>⏱️ Точный респавн:</strong> Нажал «Босс убит» — таймер пошел. Никаких сбросов и ошибок.</li>
+      <li><strong>🗝️ Учет ключей:</strong> Начинай сессию фарма, отмечай выпавшие ключи, и следи за статистикой!</li>
+      <li><strong>🔀 Умная сортировка:</strong> Приложение само поставит наверх тех, кто заспавнится быстрее всего.</li>
+      <li><strong>📱 Под любое устройство:</strong> Играешь с ПК или телефона? Настрой количество колонок и масштаб под себя — от 1 до 8 карточек в ряд.</li>
+    </ul>
+
+    <p><strong>Как начать?</strong></p>
+    <ol>
+      <li>Нажми кнопку <strong>«Начать фарм»</strong>.</li>
+      <li>Убивай боссов и жми на <strong>золотой ключик</strong> в углу карточки, когда выпадет лут!</li>
+      <li>Следи за общей статистикой во вкладке <strong>«Статистика»</strong>.</li>
+    </ol>
+
+    <div class="divider"></div>
+
+    <p class="thanks-text">
+      <em>Приложение создано для комфортного фарма в R2 Cronus. Да прибудет с тобой дроп! ⚔️🐉</em><br><br>
+      Если нафармишь много ключей и захочешь поблагодарить разработчика — вступай в гильдию <strong>PIVOPLAY</strong> и вложись в развитие) Так же примем любое пожертвование в качестве серебра на ник <strong>Impenetrable (Глава PIVOPLAY)</strong>, или пиши в тг <a href="https://t.me/ktoetotakoy7" target="_blank">@ktoetotakoy7</a>.
+    </p>
+
+    <button class="welcome-btn" onclick="closeWelcome()">Понятно, поехали! 🚀</button>
+  </div>
+</div>
+
+<script>
+const BOSSES = [
+  { name: "Шрам",                img: "https://cdn.r-2.online/image/monsters/371_IDLE.gif" },
+  { name: "Чабон",               img: "https://cdn.r-2.online/image/monsters/389_IDLE.gif" },
+  { name: "Руум",                img: "https://cdn.r-2.online/image/monsters/364_IDLE.gif" },
+  { name: "Сирена",              img: "https://cdn.r-2.online/image/monsters/35_IDLE.gif" },
+  { name: "Флинд мечник",        img: "" },
+  { name: "Паук птицеед",        img: "https://cdn.r-2.online/image/monsters/365_IDLE.gif" },
+  { name: "Стальной жук",        img: "https://cdn.r-2.online/image/monsters/705_IDLE.gif" },
+  { name: "Огр воин",            img: "https://cdn.r-2.online/image/monsters/706_IDLE.gif" },
+  { name: "Минотавр воин",       img: "https://cdn.r-2.online/image/monsters/154_IDLE.gif" },
+  { name: "Лесной куролиск",     img: "https://cdn.r-2.online/image/monsters/361_IDLE.gif" },
+  { name: "Куру",                img: "https://cdn.r-2.online/image/monsters/360_IDLE.gif" },
+  { name: "Королева Мав",        img: "https://cdn.r-2.online/image/monsters/702_IDLE.gif" },
+  { name: "Командир кобольдов",  img: "https://cdn.r-2.online/image/monsters/362_IDLE.gif" },
+  { name: "Кобалло",             img: "https://cdn.r-2.online/image/monsters/578_IDLE.gif" },
+  { name: "Гигантский тритон",   img: "https://cdn.r-2.online/image/monsters/369_IDLE.gif" },
+  { name: "Гигантский Василиск", img: "https://cdn.r-2.online/image/monsters/703_IDLE.gif" },
+  { name: "Большой тролль воин", img: "https://cdn.r-2.online/image/monsters/579_IDLE.gif" },
+  { name: "Вождь гигантов",      img: "https://cdn.r-2.online/image/monsters/120_IDLE.gif" },
+  { name: "Крепкий скелет",      img: "https://cdn.r-2.online/image/monsters/359_IDLE.gif" },
+  { name: "Король Ракум",        img: "https://cdn.r-2.online/image/monsters/704_IDLE.gif" },
+  { name: "Нага-королева",       img: "https://cdn.r-2.online/image/monsters/1011_IDLE.gif" },
+  { name: "Королева гарпий",     img: "https://cdn.r-2.online/image/monsters/363_IDLE.gif" }
+];
+
+const KEY_ICON_URL = "https://static.r2online.ru/wiki/icons/v2/item09/96_96_48.webp";
+
+const RESPAWN_MS = 20 * 60 * 1000;
+const TIMERS_KEY = "p2_boss_timers_v1";
+const FARM_KEY = "p2_boss_farm_v1";
+const SETTINGS_KEY = "p2_boss_settings_v1";
+const WELCOME_KEY = "p2_boss_welcome_shown";
+const STATS_KEY = "p2_boss_stats_v1";
+
+let timers = loadJSON(TIMERS_KEY, {});
+let farm = loadJSON(FARM_KEY, []);
+let settings = loadJSON(SETTINGS_KEY, { cols: 2, scale: 1, theme: "classic", device: "mobile" });
+let stats = loadJSON(STATS_KEY, { sessions: [], currentSession: null });
+
+if (stats.sessions) {
+  stats.sessions.forEach(s => { if (!s.drops) s.drops = []; });
+}
+
+let currentTab = "farm";
+let currentSubTab = "current";
+let tickInterval = null;
+let sessionTimerInterval = null;
+let worker = null;
+
+if (settings.device === "pc" && !settings.colsPcSet) {
+  settings.cols = 4;
+}
+
+function loadJSON(k, def) {
+  try { const v = JSON.parse(localStorage.getItem(k)); return v || def; }
+  catch { return def; }
+}
+function saveTimers() { localStorage.setItem(TIMERS_KEY, JSON.stringify(timers)); }
+function saveFarm() { localStorage.setItem(FARM_KEY, JSON.stringify(farm)); }
+function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+function saveStats() { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
+
+function applySettings() {
+  document.documentElement.style.setProperty("--cols", settings.cols);
+  document.documentElement.style.setProperty("--scale", settings.scale);
+  
+  document.body.className = "";
+  if (settings.theme === "cronus") document.body.classList.add("theme-cronus");
+  if (settings.theme === "pivoplay") document.body.classList.add("theme-pivoplay");
+  if (settings.device === "pc") document.body.classList.add("device-pc");
+  
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) {
+    if (settings.theme === "cronus") metaTheme.content = "#05070a";
+    else if (settings.theme === "pivoplay") metaTheme.content = "#140e08";
+    else metaTheme.content = "#1a1a2e";
+  }
+}
+
+function fmtTime(ts) {
+  const d = new Date(ts);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+}
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  return `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth()+1).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function fmtDuration(ms) {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return `${h}ч ${m}м`;
+}
+
+function getTimer(i) {
+  const t = timers[i];
+  if (!t) return null;
+  if (typeof t === "number") return { end: t, killedAt: t - RESPAWN_MS };
+  return t;
+}
+
+function switchMainTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+
+  const isFarm = tab === "farm";
+  const isSettings = tab === "settings";
+  
+  document.getElementById("farmSubTabs").style.display = isFarm ? "flex" : "none";
+  document.getElementById("farmControls").style.display = (isFarm && currentSubTab === "current") ? "flex" : "none";
+  
+  document.getElementById("grid").style.display = (tab === "all" || tab === "edit" || (isFarm && currentSubTab === "current")) ? "grid" : "none";
+  document.getElementById("statsView").style.display = (isFarm && currentSubTab === "stats") ? "flex" : "none";
+  document.getElementById("settings").style.display = isSettings ? "flex" : "none";
+  
+  document.getElementById("footer").style.display = (isSettings || (isFarm && currentSubTab === "stats")) ? "none" : "block";
+  document.getElementById("saveBtn").style.display = (tab === "edit") ? "inline-block" : "none";
+  document.getElementById("resetBtn").style.display = (tab === "edit") ? "none" : "inline-block";
+
+  clearInterval(tickInterval);
+  clearInterval(sessionTimerInterval);
+
+  if (isSettings) {
+    renderSettings();
+  } else if (isFarm && currentSubTab === "stats") {
+    renderStats();
+  } else {
+    render();
+    if (tab !== "edit") {
+      tickInterval = setInterval(tick, 1000);
+      if (stats.currentSession) startSessionTimer();
+    }
+  }
+}
+
+function switchSubTab(sub) {
+  currentSubTab = sub;
+  document.querySelectorAll(".sub-tab").forEach(t => t.classList.toggle("active", t.dataset.sub === sub));
+  switchMainTab("farm");
+}
+
+const grid = document.getElementById("grid");
+
+function makeAvatar(boss) {
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  if (boss.img) {
+    const img = document.createElement("img");
+    img.src = boss.img; img.alt = boss.name; img.loading = "lazy";
+    img.onerror = () => {
+      img.remove();
+      const ph = document.createElement("div");
+      ph.className = "placeholder"; ph.textContent = boss.name.charAt(0).toUpperCase();
+      avatar.appendChild(ph);
+    };
+    avatar.appendChild(img);
+  } else {
+    const ph = document.createElement("div");
+    ph.className = "placeholder"; ph.textContent = boss.name.charAt(0).toUpperCase();
+    avatar.appendChild(ph);
+  }
+  return avatar;
+}
+
+function createBossCard(i) {
+  const boss = BOSSES[i];
+  const el = document.createElement("div");
+  el.className = "boss";
+  el.dataset.index = i;
+
+  if (currentTab === "edit") {
+    const isSel = farm.includes(i);
+    el.classList.add("selectable", isSel ? "selected" : "not-selected");
+    el.appendChild(makeAvatar(boss));
+    const nameEl = document.createElement("div"); nameEl.className = "name"; nameEl.textContent = boss.name; el.appendChild(nameEl);
+    const st = document.createElement("div"); st.className = "status"; st.textContent = isSel ? "в фарме" : "не выбран"; el.appendChild(st);
+    el.onclick = () => toggleSelect(i);
+    return el;
+  }
+
+  if (currentTab === "farm" && stats.currentSession) {
+    const keyBtn = document.createElement("button");
+    keyBtn.className = "btn-key show";
+    const img = document.createElement("img");
+    img.src = KEY_ICON_URL;
+    keyBtn.appendChild(img);
+    keyBtn.onclick = (e) => { e.stopPropagation(); collectKey(i); };
+    el.appendChild(keyBtn);
+  }
+
+  el.appendChild(makeAvatar(boss));
+  const nameEl = document.createElement("div"); nameEl.className = "name"; nameEl.textContent = boss.name; el.appendChild(nameEl);
+  const killedEl = document.createElement("div"); killedEl.className = "killed-at"; el.appendChild(killedEl);
+  const statusEl = document.createElement("div"); statusEl.className = "status"; el.appendChild(statusEl);
+  const respEl = document.createElement("div"); respEl.className = "respawn-at"; el.appendChild(respEl);
+  const actions = document.createElement("div"); actions.className = "actions"; el.appendChild(actions);
+
+  return el;
+}
+
+function updateBossCard(el, i, now) {
+  const boss = BOSSES[i];
+  const t = getTimer(i);
+  const statusEl = el.querySelector(".status");
+  const killedEl = el.querySelector(".killed-at");
+  const respEl = el.querySelector(".respawn-at");
+  const actions = el.querySelector(".actions");
+  const keyBtn = el.querySelector(".btn-key");
+  
+  const left = t ? t.end - now : null;
+  
+  let newState = "idle";
+  if (!t) newState = "idle";
+  else if (left <= 0) newState = "ready";
+  else newState = "running";
+
+  if (keyBtn) {
+    if (newState === "running") keyBtn.classList.add("disabled");
+    else keyBtn.classList.remove("disabled");
+  }
+
+  const prevState = el.dataset.state;
+  
+  if (prevState === newState) {
+    if (newState === "running") {
+      const m = Math.floor(left / 60000);
+      const s = Math.floor((left % 60000) / 1000);
+      const timeStr = `${m}:${s.toString().padStart(2, "0")}`;
+      if (statusEl.textContent !== timeStr) statusEl.textContent = timeStr;
+    }
+    return;
+  }
+
+  el.dataset.state = newState;
+  el.dataset.notified15s = "";
+  el.classList.remove("running", "ready");
+  actions.className = "actions"; actions.innerHTML = "";
+
+  if (newState === "idle") {
+    statusEl.textContent = "— готов";
+    killedEl.textContent = ""; respEl.textContent = "";
+    const killBtn = document.createElement("button");
+    killBtn.className = "btn-kill"; killBtn.textContent = "Босс убит";
+    killBtn.onclick = (e) => { e.stopPropagation(); startBoss(i); };
+    actions.appendChild(killBtn);
+  } else if (newState === "ready") {
+    el.classList.add("ready");
+    statusEl.textContent = "ГОТОВ!";
+    actions.classList.add("row");
+    const killBtn = document.createElement("button");
+    killBtn.className = "btn-kill"; killBtn.textContent = "Убит";
+    killBtn.onclick = (e) => { e.stopPropagation(); startBoss(i, true); };
+    const resetBtn = document.createElement("button");
+    resetBtn.className = "btn-reset"; resetBtn.textContent = "Сброс";
+    resetBtn.onclick = (e) => { e.stopPropagation(); resetBoss(i); };
+    actions.appendChild(killBtn); actions.appendChild(resetBtn);
+
+    if (!el.dataset.notified) {
+      el.dataset.notified = "1"; 
+      notifyReady(boss.name, i);
+    }
+  } else {
+    el.classList.add("running");
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000);
+    statusEl.textContent = `${m}:${s.toString().padStart(2, "0")}`;
+    const resetBtn = document.createElement("button");
+    resetBtn.className = "btn-reset"; resetBtn.textContent = "Сброс";
+    resetBtn.onclick = (e) => { e.stopPropagation(); resetBoss(i); };
+    actions.appendChild(resetBtn);
+  }
+  
+  if (t) {
+    killedEl.textContent = `Убит в ${fmtTime(t.killedAt)}`;
+    respEl.textContent = `Рес в ${fmtTime(t.end)}`;
+  }
+}
+
+function render() {
+  const now = Date.now();
+  grid.innerHTML = "";
+
+  let list;
+  if (currentTab === "all") {
+    list = BOSSES.map((_, i) => i);
+  } else if (currentTab === "farm") {
+    list = farm.slice();
+    list.sort((a, b) => {
+      const ta = getTimer(a), tb = getTimer(b);
+      const la = ta ? ta.end - now : null; const lb = tb ? tb.end - now : null;
+      const ga = la === null ? 2 : (la <= 0 ? 0 : 1); const gb = lb === null ? 2 : (lb <= 0 ? 0 : 1);
+      if (ga !== gb) return ga - gb;
+      if (ga === 1) return la - lb;
+      return a - b;
+    });
+  } else {
+    list = BOSSES.map((_, i) => i);
+  }
+
+  if (currentTab === "farm" && list.length === 0) {
+    const div = document.createElement("div");
+    div.className = "empty"; div.textContent = "Пока пусто. Перейди в «Выбрать» и отметь боссов для фарма.";
+    grid.appendChild(div); return;
+  }
+
+  list.forEach(i => {
+    const el = createBossCard(i);
+    if (currentTab !== "edit") { el.dataset.state = ""; updateBossCard(el, i, now); }
+    grid.appendChild(el);
+  });
+  
+  updateFarmControlsUI();
+}
+
+function tick() {
+  if (currentTab === "edit" || currentTab === "settings" || currentSubTab === "stats") return;
+  const now = Date.now();
+
+  if (currentTab === "farm") {
+    let orderChanged = false;
+    const currentOrder = [...grid.children].map(el => +el.dataset.index).filter(n => !isNaN(n));
+    
+    currentOrder.forEach(i => {
+      const t = getTimer(i); const el = grid.querySelector(`[data-index="${i}"]`);
+      if (!el || !t) return;
+      const wasReady = el.dataset.state === "ready";
+      const isReady = (t.end - now) <= 0;
+      if (wasReady !== isReady) orderChanged = true;
+    });
+    
+    if (orderChanged) {
+      const sorted = farm.slice().sort((a, b) => {
+        const ta = getTimer(a), tb = getTimer(b);
+        const la = ta ? ta.end - now : null; const lb = tb ? tb.end - now : null;
+        const ga = la === null ? 2 : (la <= 0 ? 0 : 1); const gb = lb === null ? 2 : (lb <= 0 ? 0 : 1);
+        if (ga !== gb) return ga - gb;
+        if (ga === 1) return la - lb;
+        return a - b;
+      });
+      if (JSON.stringify(currentOrder) !== JSON.stringify(sorted)) {
+        const map = {}; [...grid.children].forEach(el => { map[+el.dataset.index] = el; });
+        sorted.forEach(i => { if (map[i]) grid.appendChild(map[i]); });
+      }
+    }
+  }
+
+  [...grid.children].forEach(el => {
+    const i = +el.dataset.index; if (isNaN(i)) return;
+    updateBossCard(el, i, now);
+  });
+}
+
+// ==========================================
+// БЛОК ФОНОВОГО РАБОТНИКА (WEB WORKER)
+// ==========================================
+const workerCode = `
+  let timers = {};
+  let interval = null;
+  
+  self.onmessage = function(e) {
+    if (e.data.type === 'start') {
+      timers = e.data.timers;
+      if (interval) clearInterval(interval);
+      interval = setInterval(checkTimers, 1000);
+    } else if (e.data.type === 'update') {
+      timers = e.data.timers;
+    } else if (e.data.type === 'stop') {
+      clearInterval(interval);
+    }
+  };
+
+  function checkTimers() {
+    const now = Date.now();
+    for (const i in timers) {
+      const t = timers[i];
+      const end = typeof t === 'number' ? t : t.end;
+      if (!end) continue;
+      
+      const left = end - now;
+      if (left <= 0) {
+        // Отправляем сигнал в основной поток, если босс готов
+        self.postMessage({ type: 'bossReady', id: i });
+      } else if (left <= 15000) {
+        // Отправляем сигнал за 15 секунд
+        self.postMessage({ type: 'bossWarning', id: i });
+      }
+    }
+  }
+`;
+
+let workerUrl = null;
+let workerInstance = null;
+
+function initWorker() {
+  if (workerInstance) return;
+  try {
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    workerUrl = URL.createObjectURL(blob);
+    workerInstance = new Worker(workerUrl);
+    
+    workerInstance.onmessage = function(e) {
+      const id = parseInt(e.data.id);
+      
+      if (e.data.type === 'bossWarning') {
+        // Проверяем флаг, чтобы не спамить
+        const el = grid.querySelector(`[data-index="${id}"]`);
+        if (el && !el.dataset.notified15s) {
+          el.dataset.notified15s = "1";
+          showNotification(`⏱ ${BOSSES[id].name} респавнится!`, `Осталось 15 секунд до появления.`, id, 'warning');
+        }
+      } else if (e.data.type === 'bossReady') {
+        const el = grid.querySelector(`[data-index="${id}"]`);
+        if (el && !el.dataset.notified) {
+          el.dataset.notified = "1";
+          notifyReady(BOSSES[id].name, id);
+        }
+      }
+    };
+    
+    // Отправляем текущие таймеры в работу
+    updateWorkerTimers();
+  } catch (e) {
+    console.error("Ошибка инициализации Worker:", e);
+  }
+}
+
+function updateWorkerTimers() {
+  if (workerInstance) {
+    // Отправляем только активные таймеры (у которых есть end)
+    const activeTimers = {};
+    for (const i in timers) {
+      const t = timers[i];
+      if (t) activeTimers[i] = t;
+    }
+    workerInstance.postMessage({ type: 'update', timers: activeTimers });
+  }
+}
+
+// Обновляем работу при старте/сбросе таймеров
+const originalStartBoss = startBoss;
+startBoss = function(i, force = false) {
+  originalStartBoss(i, force);
+  updateWorkerTimers();
+};
+
+const originalResetBoss = resetBoss;
+resetBoss = function(i) {
+  originalResetBoss(i);
+  updateWorkerTimers();
+};
+
+const originalResetAll = resetAll;
+resetAll = function() {
+  originalResetAll();
+  updateWorkerTimers();
+};
+
+// ==========================================
+
+function toggleSelect(i) {
+  const idx = farm.indexOf(i);
+  if (idx >= 0) farm.splice(idx, 1); else farm.push(i);
+  farm.sort((a, b) => a - b); render();
+}
+
+function saveSelection() { saveFarm(); switchMainTab("farm"); }
+
+function startBoss(i, force = false) {
+  const now = Date.now();
+  const t = getTimer(i);
+  if (!force && t && t.end > now) return;
+  timers[i] = { end: now + RESPAWN_MS, killedAt: now };
+  saveTimers();
+  const el = grid.querySelector(`[data-index="${i}"]`);
+  if (el) { el.dataset.state = ""; el.dataset.notified = ""; el.dataset.notified15s = ""; }
+  if (navigator.vibrate) navigator.vibrate(30);
+  render();
+}
+
+function resetBoss(i) {
+  delete timers[i]; saveTimers();
+  const el = grid.querySelector(`[data-index="${i}"]`);
+  if (el) { el.dataset.state = ""; el.dataset.notified = ""; el.dataset.notified15s = ""; }
+  render();
+}
+
+function resetAll() {
+  if (!confirm("Сбросить все таймеры?")) return;
+  timers = {}; saveTimers(); render();
+}
+
+function showNotification(title, body, bossIndex, type) {
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  const options = {
+    body: body,
+    icon: KEY_ICON_URL,
+    tag: 'boss-' + bossIndex + '-' + type,
+    renotify: true
+  };
+
+  try {
+    const notif = new Notification(title, options);
+    notif.onclick = function() {
+      window.focus();
+      if (type === 'ready' && bossIndex !== -1) {
+        setTimeout(() => {
+          if (currentTab !== 'farm' || currentSubTab !== 'current') {
+             switchMainTab('farm');
+             switchSubTab('current');
+          }
+          const el = grid.querySelector(`[data-index="${bossIndex}"]`);
+          if (el && el.dataset.state === 'ready') {
+             startBoss(bossIndex, true);
+          }
+        }, 100);
+      }
+      notif.close();
+    };
+  } catch (e) {
+    console.log("Не удалось показать уведомление", e);
+  }
+}
+
+function notifyReady(name, bossIndex) {
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.start(); osc.stop(ctx.currentTime + 0.6);
+  } catch {}
+  
+  showNotification(`🟢 ${name} заспавнился!`, 'Нажми на уведомление, чтобы отметить убийство.', bossIndex, 'ready');
+}
+
+// Универсальная функция для запроса разрешения и запуска теста
+function testNotificationGeneric(callback) {
+  if (!("Notification" in window)) {
+    alert("Браузер не поддерживает уведомления.");
+    return;
+  }
+  
+  if (Notification.permission === "granted") {
+    callback();
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        renderSettings();
+        callback();
+      } else {
+        alert("Уведомления заблокированы. Разрешите их в настройках браузера (иконка замка).");
+      }
+    });
+  } else {
+    alert("Уведомления заблокированы. Разрешите их в настройках браузера (иконка замка).");
+  }
+}
+
+function testNotification() {
+  testNotificationGeneric(() => {
+    alert("Тестовое уведомление появится через 5 секунд. Можете свернуть браузер!");
+    setTimeout(() => {
+      new Notification("🔔 Тест уведомлений", {
+        body: "Если вы видите это сообщение, уведомления работают корректно!",
+        icon: KEY_ICON_URL
+      });
+    }, 5000);
+  });
+}
+
+function testBossNotification() {
+  testNotificationGeneric(() => {
+    alert("Тестовое уведомление о боссе появится через 3 секунды. Можете свернуть браузер!");
+    setTimeout(() => {
+      new Notification("⏱ Шрам респавнится!", {
+        body: "Осталось 15 секунд до появления.",
+        icon: KEY_ICON_URL,
+        tag: 'test-boss',
+        renotify: true
+      });
+    }, 3000);
+  });
+}
+
+function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    alert("Ваш браузер не поддерживает уведомления.");
+    return;
+  }
+  
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      alert("Уведомления включены! Теперь вы будете получать оповещения о боссах.");
+      renderSettings();
+    } else {
+      alert("Уведомления заблокированы. Разрешите их в настройках браузера.");
+    }
+  });
+}
+
+function openWelcome() { document.getElementById("welcomeModal").classList.add("show"); }
+function closeWelcome() { document.getElementById("welcomeModal").classList.remove("show"); localStorage.setItem(WELCOME_KEY, "true"); }
+
+function toggleFarmSession() {
+  if (stats.currentSession) {
+    const now = Date.now();
+    const duration = now - stats.currentSession.startTime;
+    stats.sessions.unshift({
+      startTime: stats.currentSession.startTime,
+      endTime: now,
+      duration: duration,
+      keys: stats.currentSession.keys,
+      drops: stats.currentSession.drops || []
+    });
+    stats.currentSession = null;
+    saveStats();
+    renderStats();
+    switchSubTab("stats");
+    render();
+  } else {
+    stats.currentSession = { startTime: Date.now(), keys: 0, drops: [] };
+    saveStats();
+    render();
+    startSessionTimer();
+  }
+  updateFarmControlsUI();
+}
+
+function collectKey(i) {
+  if (!stats.currentSession) return;
+  const t = getTimer(i);
+  const now = Date.now();
+  
+  if (t && t.end > now) return;
+
+  stats.currentSession.keys += 1;
+  
+  if (!stats.currentSession.drops) stats.currentSession.drops = [];
+  stats.currentSession.drops.push({
+    bossName: BOSSES[i].name,
+    time: now,
+    elapsed: now - stats.currentSession.startTime
+  });
+  
+  saveStats();
+  startBoss(i);
+  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+}
+
+function startSessionTimer() {
+  clearInterval(sessionTimerInterval);
+  if (!stats.currentSession) return;
+  
+  sessionTimerInterval = setInterval(() => {
+    if (!stats.currentSession || (currentTab !== "farm" || currentSubTab !== "current")) return;
+    updateFarmControlsUI();
+  }, 1000);
+}
+
+function updateFarmControlsUI() {
+  const btn = document.getElementById("farmBtn");
+  const statusText = document.getElementById("farmStatusText");
+  const timerText = document.getElementById("farmStatusTimer");
+
+  if (stats.currentSession) {
+    const duration = Date.now() - stats.currentSession.startTime;
+    const h = Math.floor(duration / 3600000);
+    const m = Math.floor((duration % 3600000) / 60000);
+    const s = Math.floor((duration % 60000) / 1000);
+    
+    statusText.textContent = `Фарм идёт. Ключей: ${stats.currentSession.keys}`;
+    timerText.textContent = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    btn.textContent = "Завершить фарм";
+    btn.className = "btn-farm stop";
+  } else {
+    statusText.textContent = "Фарм не запущен";
+    timerText.textContent = "00:00:00";
+    btn.textContent = "Начать фарм";
+    btn.className = "btn-farm";
+  }
+}
+
+function renderStats() {
+  const container = document.getElementById("statsView");
+  const totalKeys = stats.sessions.reduce((sum, s) => sum + s.keys, 0) + (stats.currentSession ? stats.currentSession.keys : 0);
+  
+  let html = `
+    <div class="stat-card">
+      <h3>Всего выбито ключей</h3>
+      <div class="val">${totalKeys}</div>
+    </div>
+    <div class="stat-card">
+      <h3>Завершено сессий</h3>
+      <div class="val">${stats.sessions.length}</div>
+    </div>
+  `;
+  
+  if (stats.currentSession) {
+    html += `
+      <div class="stat-card" style="border-color: var(--accent);">
+        <h3>Текущая сессия</h3>
+        <div class="val" style="color: #4ade80;">${stats.currentSession.keys} ключей</div>
+      </div>
+    `;
+  }
+
+  html += `<h3 style="margin-top: 16px; font-size: 14px; color: var(--text-muted);">История сессий (нажми для деталей)</h3>`;
+  
+  if (stats.sessions.length === 0) {
+    html += `<div class="empty" style="padding: 20px;">Пока нет завершенных сессий.</div>`;
+  } else {
+    html += `<div class="session-list">`;
+    stats.sessions.forEach((s, idx) => {
+      html += `
+        <div class="session-item" onclick="openSessionDetails(${idx})">
+          <div>
+            <div>${fmtDate(s.startTime)}</div>
+            <div class="date">Длительность: ${fmtDuration(s.duration)}</div>
+          </div>
+          <div style="display:flex; align-items:center;">
+            <div class="keys">${s.keys} 🗝️</div>
+            <div class="arrow">›</div>
+          </div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    
+    html += `
+      <button class="reset-settings" style="margin-top: 16px; background: #8b2e2e; color: #fff;" onclick="clearStats()">
+        Очистить всю статистику
+      </button>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+function openSessionDetails(idx) {
+  const s = stats.sessions[idx];
+  if (!s) return;
+
+  document.getElementById("sessionModalTitle").textContent = `Фарм от ${fmtDate(s.startTime)}`;
+  
+  const body = document.getElementById("sessionModalBody");
+  
+  if (!s.drops || s.drops.length === 0) {
+    body.innerHTML = `<div class="empty" style="padding: 20px;">Для этой сессии детали дропа не сохранились (старая версия).</div>`;
+  } else {
+    let html = `<div style="font-size: 13px; margin-bottom: 12px; color: var(--text-muted);">
+      Всего убито боссов с лутом: <strong style="color: var(--accent);">${s.drops.length}</strong><br>
+      Время сессии: <strong>${fmtDuration(s.duration)}</strong>
+    </div>`;
+    
+    html += `<div class="drop-list">`;
+    s.drops.forEach(d => {
+      const mins = Math.floor(d.elapsed / 60000);
+      const secs = Math.floor((d.elapsed % 60000) / 1000);
+      const elapsedStr = `${mins}:${String(secs).padStart(2, "0")}`;
+      
+      html += `
+        <div class="drop-item">
+          <div class="left-part">
+            <img src="${KEY_ICON_URL}" class="key-icon">
+            <div>
+              <div class="boss-name">${d.bossName}</div>
+            </div>
+          </div>
+          <div class="time-info">
+            <div>${fmtTime(d.time)}</div>
+            <div style="opacity:0.7;">+${elapsedStr} от старта</div>
+          </div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    
+    body.innerHTML = html;
+  }
+
+  document.getElementById("sessionModal").classList.add("show");
+}
+
+function closeSessionModal() {
+  document.getElementById("sessionModal").classList.remove("show");
+}
+
+function clearStats() {
+  if (!confirm("Удалить всю историю и счетчики ключей?")) return;
+  stats = { sessions: [], currentSession: null };
+  saveStats();
+  renderStats();
+  updateFarmControlsUI();
+}
+
+const settingsEl = document.getElementById("settings");
+
+function renderSettings() {
+  const isPC = settings.device === "pc";
+  const notifPerm = ("Notification" in window) ? Notification.permission : "unsupported";
+
+  settingsEl.innerHTML = `
+    <div class="setting-block">
+      <label class="title">🔔 Уведомления</label>
+      <div class="hint" style="margin-top: 0; margin-bottom: 12px;">
+        ${notifPerm === 'granted' ? '✅ Уведомления включены.' : ''}
+        ${notifPerm === 'denied' ? '⚠️ Уведомления заблокированы. Разрешите их в настройках браузера (иконка замка).' : ''}
+        ${notifPerm === 'default' ? 'Включите, чтобы получать системные уведомления.' : ''}
+      </div>
+      
+      ${notifPerm === 'default' ? `<button class="reset-settings" onclick="requestNotificationPermission()" style="background: var(--accent); color: var(--bg-color); margin-bottom: 8px;">Включить уведомления</button>` : ''}
+      
+      <!-- Кнопки тестов видны всегда -->
+      <button class="reset-settings" onclick="testNotification()" style="background: var(--panel-border); margin-bottom: 8px;">⏱ Тест оповещения (через 5 сек)</button>
+      <button class="reset-settings" onclick="testBossNotification()" style="background: var(--panel-border);">👹 Тест: Босс респавнится</button>
+    </div>
+
+    <div class="setting-block">
+      <label class="title">🖥️ Устройство</label>
+      <div class="picker-grid">
+        <button data-device="mobile" class="${!isPC ? 'active' : ''}">📱 Телефон</button>
+        <button data-device="pc" class="${isPC ? 'active' : ''}">💻 ПК</button>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <label class="title">🎨 Тема оформления</label>
+      <div class="picker-grid themes-3">
+        <button data-theme="classic" class="${settings.theme === 'classic' ? 'active' : ''}">Классика</button>
+        <button data-theme="cronus" class="${settings.theme === 'cronus' ? 'active' : ''}">Cronus</button>
+        <button data-theme="pivoplay" class="${settings.theme === 'pivoplay' ? 'active' : ''}">PIVOPLAY</button>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <label class="title">📐 Количество карточек в ряд</label>
+      <div class="picker-grid cols-8">
+        ${[1,2,3,4,5,6,7,8].map(n => `
+          <button data-cols="${n}" class="${settings.cols === n ? 'active' : ''}">${n}</button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <label class="title">🔍 Размер элементов</label>
+      <div class="scale-row">
+        <input type="range" id="scaleRange" min="0.4" max="1.4" step="0.05" value="${settings.scale}">
+        <div class="scale-value" id="scaleValue">${Math.round(settings.scale * 100)}%</div>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <label class="title">ℹ️ Информация</label>
+      <button class="reset-settings" onclick="openWelcome()" style="background: var(--panel-border); margin-bottom: 8px;">Показать приветствие</button>
+      <button class="reset-settings" onclick="resetSettings()">Сбросить настройки</button>
+    </div>
+  `;
+
+  settingsEl.querySelectorAll("[data-device]").forEach(btn => {
+    btn.onclick = () => { settings.device = btn.dataset.device; if (settings.device === "pc" && settings.cols < 3) settings.cols = 4; saveSettings(); applySettings(); renderSettings(); };
+  });
+  settingsEl.querySelectorAll("[data-theme]").forEach(btn => {
+    btn.onclick = () => { settings.theme = btn.dataset.theme; saveSettings(); applySettings(); renderSettings(); };
+  });
+  settingsEl.querySelectorAll("[data-cols]").forEach(btn => {
+    btn.onclick = () => { settings.cols = +btn.dataset.cols; saveSettings(); applySettings(); renderSettings(); };
+  });
+
+  const range = settingsEl.querySelector("#scaleRange");
+  const valEl = settingsEl.querySelector("#scaleValue");
+  range.addEventListener("input", () => { settings.scale = parseFloat(range.value); valEl.textContent = Math.round(settings.scale * 100) + "%"; applySettings(); });
+  range.addEventListener("change", () => saveSettings());
+}
+
+function resetSettings() {
+  settings = { cols: 2, scale: 1, theme: "classic", device: "mobile" };
+  saveSettings(); applySettings(); renderSettings();
+}
+
+applySettings();
+switchMainTab("farm");
+
+// Инициализируем фоновый обработчик
+initWorker();
+
+if (!localStorage.getItem(WELCOME_KEY)) {
+  openWelcome();
+}
+
+document.addEventListener("visibilitychange", () => { 
+  if (!document.hidden && currentTab !== "edit" && currentTab !== "settings" && currentSubTab !== "stats") tick(); 
+});
+</script>
+</body>
+</html>
