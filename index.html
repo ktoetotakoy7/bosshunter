@@ -12,49 +12,27 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :root {
-    --cols: 2;
-    --scale: 1;
-    --max-width: 100%;
-    --body-padding: 12px;
-    
-    --bg-color: #1a1a2e;
-    --panel-bg: #16213e;
-    --panel-border: #0f3460;
-    --text-color: #eee;
-    --text-muted: #8899aa;
-    --accent: #e94560;
-    --btn-kill: #e94560;
-    --btn-reset: #3a4a6a;
+    --cols: 2; --scale: 1; --max-width: 100%; --body-padding: 12px;
+    --bg-color: #1a1a2e; --panel-bg: #16213e; --panel-border: #0f3460;
+    --text-color: #eee; --text-muted: #8899aa; --accent: #e94560;
+    --btn-kill: #e94560; --btn-reset: #3a4a6a;
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --border-radius: 12px;
-    --clip-path: none;
-    --metal-gradient: none;
+    --border-radius: 12px; --clip-path: none; --metal-gradient: none;
   }
 
   body.theme-cronus {
-    --bg-color: #05070a;
-    --panel-bg: rgba(13, 17, 26, 0.95);
-    --panel-border: #2a3245;
-    --text-color: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent: #d4af37;
-    --btn-kill: #2a2418;
-    --btn-reset: #1e293b;
-    --font-main: 'Tektur', sans-serif;
-    --border-radius: 0px; 
+    --bg-color: #05070a; --panel-bg: rgba(13, 17, 26, 0.95); --panel-border: #2a3245;
+    --text-color: #f8fafc; --text-muted: #94a3b8; --accent: #d4af37;
+    --btn-kill: #2a2418; --btn-reset: #1e293b;
+    --font-main: 'Tektur', sans-serif; --border-radius: 0px; 
     --clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
     --metal-gradient: linear-gradient(180deg, #e2e8f0 0%, #94a3b8 100%);
   }
 
   body.theme-pivoplay {
-    --bg-color: #140e08;
-    --panel-bg: rgba(46, 26, 11, 0.9);
-    --panel-border: #5c3817;
-    --text-color: #fff4e6;
-    --text-muted: #c4a582;
-    --accent: #f5a623;
-    --btn-kill: #6b3e12; 
-    --btn-reset: #3d2208;
+    --bg-color: #140e08; --panel-bg: rgba(46, 26, 11, 0.9); --panel-border: #5c3817;
+    --text-color: #fff4e6; --text-muted: #c4a582; --accent: #f5a623;
+    --btn-kill: #6b3e12; --btn-reset: #3d2208;
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --border-radius: 12px;
     --clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
@@ -64,18 +42,10 @@
   body.device-pc { --max-width: 1400px; --body-padding: 20px; }
 
   body {
-    font-family: var(--font-main);
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    padding: var(--body-padding);
-    min-height: 100vh;
-    padding-bottom: 80px;
-    transition: background 0.3s, color 0.3s;
-    background-attachment: fixed;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    -webkit-font-smoothing: antialiased;
+    font-family: var(--font-main); background-color: var(--bg-color); color: var(--text-color);
+    padding: var(--body-padding); min-height: 100vh; padding-bottom: 80px;
+    transition: background 0.3s, color 0.3s; background-attachment: fixed;
+    display: flex; flex-direction: column; align-items: center; -webkit-font-smoothing: antialiased;
   }
   
   body.theme-cronus::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 100%, rgba(180, 30, 30, 0.3) 0%, transparent 60%), radial-gradient(ellipse at 10% 50%, rgba(30, 60, 120, 0.2) 0%, transparent 50%), #05070a; pointer-events: none; z-index: -1; }
@@ -122,13 +92,7 @@
   body.theme-cronus .boss { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6); border: 1px solid #3a3020; }
   body.theme-pivoplay .boss { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); border: 1px solid #5c3817; }
 
-  .btn-key {
-    position: absolute; top: 4px; right: 4px; width: 32px; height: 32px;
-    background: #d4af37; border: 2px solid #fff; border-radius: 50%;
-    display: none; align-items: center; justify-content: center; cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 5; transition: transform 0.1s;
-    padding: 4px;
-  }
+  .btn-key { position: absolute; top: 4px; right: 4px; width: 32px; height: 32px; background: #d4af37; border: 2px solid #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 5; transition: transform 0.1s; padding: 4px; }
   .btn-key img { width: 100%; height: 100%; object-fit: contain; }
   .btn-key:active { transform: scale(0.85); }
   .btn-key.disabled { filter: grayscale(1) opacity(0.4); cursor: not-allowed; pointer-events: none; border-color: #888; background: #555; }
@@ -185,9 +149,7 @@
   .session-list { display: flex; flex-direction: column; gap: 8px; }
   
   .session-item { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; cursor: pointer; transition: border-color 0.2s, background 0.2s; clip-path: var(--clip-path); }
-  body.theme-cronus .session-item { border-radius: 0; }
-  body.theme-pivoplay .session-item { border-radius: 0; }
-  
+  body.theme-cronus .session-item { border-radius: 0; } body.theme-pivoplay .session-item { border-radius: 0; }
   .session-item:hover { border-color: var(--accent); background: rgba(255,255,255,0.05); }
   .session-item .date { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
   .session-item .keys { font-weight: 700; color: var(--accent); font-size: 16px; }
@@ -239,8 +201,7 @@
   
   .drop-list { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; }
   .drop-item { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 13px; }
-  body.theme-cronus .drop-item { border-radius: 0; }
-  body.theme-pivoplay .drop-item { border-radius: 0; }
+  body.theme-cronus .drop-item { border-radius: 0; } body.theme-pivoplay .drop-item { border-radius: 0; }
   .drop-item .boss-name { font-weight: 700; color: var(--text-color); }
   .drop-item .time-info { font-size: 11px; color: var(--text-muted); text-align: right; }
   .drop-item .key-icon { width: 20px; height: 20px; margin-right: 8px; }
@@ -273,7 +234,7 @@
 
 <div class="app-container">
   <h1>
-    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.5</span>
+    ⏱ ТАЙМЕРЫ БОССОВ <span style="color:var(--text-muted); font-size:11px;">v0.5.6</span>
     <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
   </h1>
 
@@ -319,11 +280,8 @@
   <div class="welcome-content">
     <button class="welcome-close" onclick="closeWelcome()">✕</button>
     <h2>🛡️ Добро пожаловать в таймеры боссов R2 Cronus!</h2>
-    
     <p class="intro">У тебя есть кольцо телепортации или гигантский запас рун ТП? Это приложение для тебя! =)</p>
-    
     <p>Хватит бегать по всей карте впустую, надеясь, что босс уже реснулся. Теперь весь фарм под контролем. Наш инструмент создан, чтобы экономить твои руны, нервы и время.</p>
-    
     <p><strong>Что умеет приложение:</strong></p>
     <ul>
       <li><strong>⏱️ Точный респавн:</strong> Нажал «Босс убит» — таймер пошел. Никаких сбросов и ошибок.</li>
@@ -331,21 +289,17 @@
       <li><strong>🔀 Умная сортировка:</strong> Приложение само поставит наверх тех, кто заспавнится быстрее всего.</li>
       <li><strong>📱 Под любое устройство:</strong> Играешь с ПК или телефона? Настрой количество колонок и масштаб под себя — от 1 до 8 карточек в ряд.</li>
     </ul>
-
     <p><strong>Как начать?</strong></p>
     <ol>
       <li>Нажми кнопку <strong>«Начать фарм»</strong>.</li>
       <li>Убивай боссов и жми на <strong>золотой ключик</strong> в углу карточки, когда выпадет лут!</li>
       <li>Следи за общей статистикой во вкладке <strong>«Статистика»</strong>.</li>
     </ol>
-
     <div class="divider"></div>
-
     <p class="thanks-text">
       <em>Приложение создано для комфортного фарма в R2 Cronus. Да прибудет с тобой дроп! ⚔️🐉</em><br><br>
       Если нафармишь много ключей и захочешь поблагодарить разработчика — вступай в гильдию <strong>PIVOPLAY</strong> и вложись в развитие) Так же примем любое пожертвование в качестве серебра на ник <strong>Impenetrable (Глава PIVOPLAY)</strong>, или пиши в тг <a href="https://t.me/ktoetotakoy7" target="_blank">@ktoetotakoy7</a>.
     </p>
-
     <button class="welcome-btn" onclick="closeWelcome()">Понятно, поехали! 🚀</button>
   </div>
 </div>
@@ -377,7 +331,6 @@ const BOSSES = [
 ];
 
 const KEY_ICON_URL = "https://static.r2online.ru/wiki/icons/v2/item09/96_96_48.webp";
-
 const RESPAWN_MS = 20 * 60 * 1000;
 const TIMERS_KEY = "p2_boss_timers_v1";
 const FARM_KEY = "p2_boss_farm_v1";
@@ -732,10 +685,8 @@ const workerCode = `
       
       const left = end - now;
       if (left <= 0) {
-        // Отправляем сигнал в основной поток, если босс готов
         self.postMessage({ type: 'bossReady', id: i });
       } else if (left <= 15000) {
-        // Отправляем сигнал за 15 секунд
         self.postMessage({ type: 'bossWarning', id: i });
       }
     }
@@ -756,7 +707,6 @@ function initWorker() {
       const id = parseInt(e.data.id);
       
       if (e.data.type === 'bossWarning') {
-        // Проверяем флаг, чтобы не спамить
         const el = grid.querySelector(`[data-index="${id}"]`);
         if (el && !el.dataset.notified15s) {
           el.dataset.notified15s = "1";
@@ -771,7 +721,6 @@ function initWorker() {
       }
     };
     
-    // Отправляем текущие таймеры в работу
     updateWorkerTimers();
   } catch (e) {
     console.error("Ошибка инициализации Worker:", e);
@@ -780,7 +729,6 @@ function initWorker() {
 
 function updateWorkerTimers() {
   if (workerInstance) {
-    // Отправляем только активные таймеры (у которых есть end)
     const activeTimers = {};
     for (const i in timers) {
       const t = timers[i];
@@ -790,7 +738,6 @@ function updateWorkerTimers() {
   }
 }
 
-// Обновляем работу при старте/сбросе таймеров
 const originalStartBoss = startBoss;
 startBoss = function(i, force = false) {
   originalStartBoss(i, force);
@@ -808,7 +755,6 @@ resetAll = function() {
   originalResetAll();
   updateWorkerTimers();
 };
-
 // ==========================================
 
 function toggleSelect(i) {
@@ -892,7 +838,6 @@ function notifyReady(name, bossIndex) {
   showNotification(`🟢 ${name} заспавнился!`, 'Нажми на уведомление, чтобы отметить убийство.', bossIndex, 'ready');
 }
 
-// Универсальная функция для запроса разрешения и запуска теста
 function testNotificationGeneric(callback) {
   if (!("Notification" in window)) {
     alert("Браузер не поддерживает уведомления.");
@@ -1166,10 +1111,7 @@ function renderSettings() {
         ${notifPerm === 'denied' ? '⚠️ Уведомления заблокированы. Разрешите их в настройках браузера (иконка замка).' : ''}
         ${notifPerm === 'default' ? 'Включите, чтобы получать системные уведомления.' : ''}
       </div>
-      
       ${notifPerm === 'default' ? `<button class="reset-settings" onclick="requestNotificationPermission()" style="background: var(--accent); color: var(--bg-color); margin-bottom: 8px;">Включить уведомления</button>` : ''}
-      
-      <!-- Кнопки тестов видны всегда -->
       <button class="reset-settings" onclick="testNotification()" style="background: var(--panel-border); margin-bottom: 8px;">⏱ Тест оповещения (через 5 сек)</button>
       <button class="reset-settings" onclick="testBossNotification()" style="background: var(--panel-border);">👹 Тест: Босс респавнится</button>
     </div>
@@ -1239,7 +1181,6 @@ function resetSettings() {
 applySettings();
 switchMainTab("farm");
 
-// Инициализируем фоновый обработчик
 initWorker();
 
 if (!localStorage.getItem(WELCOME_KEY)) {
