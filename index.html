@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#080c14">
-<title>BOSSHUNTER v0.6.3</title>
+<title>BOSSHUNTER v0.7.4</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,7 +118,6 @@
   .grid { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: calc(10px * var(--scale)); }
   body.device-pc .grid { gap: 12px; }
 
-  /* Базовая карточка */
   .boss { 
     background: var(--panel-bg); 
     border: 1px solid var(--panel-border); 
@@ -138,12 +137,16 @@
   body.theme-cronus .boss { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6); border: 1px solid #3a3020; }
   body.theme-pivoplay .boss { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); border: 1px solid #5c3817; }
 
-  /* Псевдоэлемент для градиентной обводки в Cronus */
+  .boss.boss-pit {
+    padding-bottom: 16px;
+    min-height: 220px;
+  }
+
   body.theme-cronus .boss::before {
     content: "";
     position: absolute;
     inset: 0;
-    padding: 2px; /* Толщина обводки */
+    padding: 2px;
     background: transparent;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -178,13 +181,12 @@
   .boss .status { font-size: max(calc(13px * var(--scale)), 9px); color: var(--text-muted); font-variant-numeric: tabular-nums; pointer-events: none; min-height: calc(18px * var(--scale)); white-space: nowrap; }
   
   .boss.running { border-color: var(--accent); background: var(--bg-color); }
-  body.theme-cronus .boss.running { border-color: transparent; } /* Убираем стандартный бордер, работает псевдоэлемент */
+  body.theme-cronus .boss.running { border-color: transparent; }
   body.theme-pivoplay .boss.running { border-color: #f5a623; }
   
   .boss.running .status { color: #ffb347; font-size: max(calc(22px * var(--scale)), 11px); font-weight: 700; }
   body.theme-cronus .boss.running .status { color: #d4af37; }
   
-  /* Металлическая обводка для RUNNING */
   body.theme-cronus .boss.running::before {
     background: var(--metal-gradient);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
@@ -199,6 +201,35 @@
   }
 
   body.theme-pivoplay .boss.running .status { color: #f5a623; }
+
+  .boss.window-state {
+    border-color: #ffb347;
+    background: rgba(46, 36, 11, 0.9);
+    animation: pulse-window 2s infinite;
+  }
+  body.theme-cronus .boss.window-state {
+    border-color: transparent;
+  }
+  body.theme-cronus .boss.window-state::before {
+    background: linear-gradient(180deg, #f5a623 0%, #b8860b 100%);
+    box-shadow: 0 0 20px rgba(245, 166, 35, 0.6);
+  }
+  .boss.window-state .status {
+    color: #f5a623;
+    font-size: max(calc(16px * var(--scale)), 10px);
+    font-weight: 800;
+  }
+  .boss.window-state .window-timer {
+    display: block;
+    font-size: max(calc(14px * var(--scale)), 10px);
+    color: #ffd700;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  @keyframes pulse-window {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(245, 166, 35, 0); }
+  }
 
   .boss.ready { border-color: #4ade80; background: #1a3a2a; }
   body.theme-cronus .boss.ready { border-color: transparent; } 
@@ -219,23 +250,26 @@
   
   .actions button:active { filter: brightness(1.3); transform: scale(0.97); }
   .btn-kill { background: var(--btn-kill); } .btn-reset { background: var(--btn-reset); color: var(--text-color); }
+  .btn-custom { background: #3a4a6a; color: var(--text-color); }
   
   body.theme-cronus .btn-kill { background: var(--metal-gradient); color: #05070a; border: none; font-weight: 800; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
   body.theme-pivoplay .btn-kill { background: #6b3e12; border-color: #a86b2a; color: #fff4e6; }
   
   body.theme-cronus .btn-reset { background: linear-gradient(180deg, #2a3648 0%, #141b26 100%); border-color: #4a5a75; color: #e2e8f0; }
   body.theme-pivoplay .btn-reset { background: #3d2208; border-color: #6b4623; color: #e8d4b8; }
+  
+  body.theme-cronus .btn-custom { background: linear-gradient(180deg, #2a3648 0%, #141b26 100%); border-color: #4a5a75; color: #e2e8f0; }
+  body.theme-pivoplay .btn-custom { background: #3d2208; border-color: #6b4623; color: #e8d4b8; }
 
   .boss.selectable { cursor: pointer; } 
   .boss.selected { border-color: #4ade80; background: #1a3a2a; }
   
-  /* Выбранная карточка в Cronus */
   body.theme-cronus .boss.selected { 
     border-color: transparent; 
     background: rgba(42, 36, 24, 0.6); 
   }
   body.theme-cronus .boss.selected::before {
-    background: var(--metal-gradient); /* Металлическая обводка */
+    background: var(--metal-gradient);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
   }
   
@@ -251,7 +285,7 @@
   .stats-container { display: flex; flex-direction: column; gap: 16px; width: 100%; }
   .stat-card { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--border-radius); padding: 16px; display: flex; align-items: center; justify-content: space-between; clip-path: var(--clip-path); }
   .stat-card h3 { font-size: 14px; color: var(--text-muted); text-transform: uppercase; margin: 0; }
-  .stat-card .val { font-size: 28px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .stat-card .val { font-size: 28px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; text-align: right; line-height: 1.2; }
   .session-list { display: flex; flex-direction: column; gap: 8px; }
   
   .session-item { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; cursor: pointer; transition: border-color 0.2s, background 0.2s; clip-path: var(--clip-path); }
@@ -343,7 +377,7 @@
 <div class="app-container">
   <div class="header">
     <h1>
-      BOSSHUNTER <span style="color:var(--text-muted); font-size:11px;">v0.6.3</span>
+      BOSSHUNTER <span style="color:var(--text-muted); font-size:11px;">v0.7.4</span>
       <div style="color:var(--text-muted); font-size:10px; font-weight:400; margin-top:2px;">by PIVOPLAY for CRONUS</div>
     </h1>
     <div class="btn-settings-top" onclick="switchMainTab('settings')" title="Настройки">⚙️</div>
@@ -382,6 +416,25 @@
   </div>
 </div>
 
+<!-- Модалка для ввода времени -->
+<div class="session-modal" id="timeModal">
+  <div class="session-modal-content" style="max-width: 340px; text-align: center;">
+    <button class="session-modal-close" onclick="closeTimeModal()">✕</button>
+    <h2 style="font-size: 16px; margin-bottom: 12px;">Время смерти</h2>
+    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Введи время, когда босс был убит:</p>
+    
+    <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 20px;">
+      <input type="number" id="timeHours" min="0" max="23" placeholder="ЧЧ" style="width: 55px; padding: 10px; font-size: 16px; text-align: center; background: var(--panel-bg); color: var(--text-color); border: 1px solid var(--panel-border); border-radius: 8px; outline: none;">
+      <span style="font-size: 18px; font-weight: bold;">:</span>
+      <input type="number" id="timeMinutes" min="0" max="59" placeholder="ММ" style="width: 55px; padding: 10px; font-size: 16px; text-align: center; background: var(--panel-bg); color: var(--text-color); border: 1px solid var(--panel-border); border-radius: 8px; outline: none;">
+      <span style="font-size: 18px; font-weight: bold;">:</span>
+      <input type="number" id="timeSeconds" min="0" max="59" placeholder="СС" style="width: 55px; padding: 10px; font-size: 16px; text-align: center; background: var(--panel-bg); color: var(--text-color); border: 1px solid var(--panel-border); border-radius: 8px; outline: none;">
+    </div>
+
+    <button class="reset-settings btn-notify-enable" onclick="submitCustomTime()" style="padding: 10px;">Применить</button>
+  </div>
+</div>
+
 <div class="session-modal" id="sessionModal">
   <div class="session-modal-content">
     <button class="session-modal-close" onclick="closeSessionModal()">✕</button>
@@ -394,32 +447,41 @@
   <div class="welcome-content">
     <button class="welcome-close" onclick="closeWelcome()">✕</button>
     <h2>🛡️ Добро пожаловать в BOSSHUNTER!</h2>
-    <p class="intro">У тебя есть кольцо телепортации или гигантский запас рун ТП? Это приложение для тебя! =)</p>
-    <p>Хватит бегать по всей карте впустую, надеясь, что босс уже реснулся. Теперь весь фарм под контролем. Наш инструмент создан, чтобы экономить твои руны, нервы и время.</p>
+    
+    <p class="intro">Устал бегать по локациям впустую и гадать, реснулся ли босс? Теперь весь фарм под контролем. Мы создали этот инструмент, чтобы ты экономил свои руны ТП, нервы и время.</p>
+    
     <p><strong>Что умеет приложение:</strong></p>
     <ul>
-      <li><strong>⏱️ Точный респавн:</strong> Нажал «Босс убит» — таймер пошел. Никаких сбросов и ошибок.</li>
-      <li><strong>🗝️ Учет ключей:</strong> Начинай сессию фарма, отмечай выпавшие ключи, и следи за статистикой!</li>
-      <li><strong>🔀 Умная сортировка:</strong> Приложение само поставит наверх тех, кто заспавнится быстрее всего.</li>
-      <li><strong>📱 Под любое устройство:</strong> Играешь с ПК или телефона? Настрой количество колонок и масштаб под себя — от 1 до 8 карточек в ряд.</li>
+      <li><strong>⏱️ Точные таймеры для Мини-Питов (20 мин):</strong> Нажал «Босс убит» — пошел отсчет. Идеально для быстрого фарма.</li>
+      <li><strong>⏳ Умный респавн для Питов (Рейд-боссов):</strong> Вводи точное время смерти (вплоть до секунд) или жми «Босс убит», если убил только что. Приложение само учтет базовый таймер и рандомное окно (например, 8ч + 1ч).</li>
+      <li><strong>🔔 Системные уведомления:</strong> Приложение предупредит тебя *за 15 секунд* до появления босса и в момент его спавна. Больше не пропустишь дроп!</li>
+      <li><strong>🗝️ Учет ключей:</strong> Начинай сессию фарма, отмечай выпавшие ключи, и приложение будет вести детальную статистику (кто дропнул, во сколько, сколько всего убито).</li>
+      <li><strong>🔀 Умная сортировка:</strong> Боссы, которые скоро появятся, всегда будут наверху списка.</li>
+      <li><strong>🎨 3 темы и режим минимализма:</strong> Строгий металлический *Cronus*, пивная *PIVOPLAY* или *Классика*. А если нужен максимальный обзор — включи минимализм (без картинок, только таймеры).</li>
+      <li><strong>📱 Под любое устройство:</strong> Настрой количество колонок (от 1 до 8) и масштаб элементов под свой экран.</li>
     </ul>
+
     <p><strong>Как начать?</strong></p>
     <ol>
-      <li>Нажми кнопку <strong>«Начать фарм»</strong>.</li>
-      <li>Убивай боссов и жми на <strong>золотой ключик</strong> в углу карточки, когда выпадет лут!</li>
-      <li>Следи за общей статистикой во вкладке <strong>«Статистика»</strong>.</li>
+      <li>Нажми кнопку <strong>«Начать фарм»</strong>, чтобы запустить сессию.</li>
+      <li>Убивай боссов: на Мини-Питах жми на <strong>золотой ключик</strong>, на Питах — указывай точное время смерти или жми «Убит».</li>
+      <li>Следи за таймерами и жди уведомлений. Когда загорится «ГОТОВ!» — беги за дропом!</li>
     </ol>
+
     <div class="divider"></div>
+
     <p class="thanks-text">
       <em>Приложение создано для комфортного фарма в R2 Cronus. Да прибудет с тобой дроп! ⚔️🐉</em><br><br>
-      Если нафармишь много ключей и захочешь поблагодарить разработчика — вступай в гильдию <strong>PIVOPLAY</strong> и вложись в развитие) Так же примем любое пожертвование в качестве серебра на ник <strong>Impenetrable (Глава PIVOPLAY)</strong>, или пиши в тг <a href="https://t.me/ktoetotakoy7" target="_blank">@ktoetotakoy7</a>.
+      <strong>Если захочешь поблагодарить разработчика</strong> — вступай в гильдию <strong>PIVOPLAY</strong> и вложись в развитие). Так же примем любое пожертвование в качестве серебра на ник <strong>Impenetrable (Глава PIVOPLAY)</strong> :D , или пиши в тг <a href="https://t.me/ktoetotakoy7" target="_blank">@ktoetotakoy7</a> — сюда же присылай пожелания по поводу приложения).
     </p>
+
     <button class="welcome-btn" onclick="closeWelcome()">Понятно, поехали! 🚀</button>
   </div>
 </div>
 
 <script>
 const BOSSES = [
+  // --- МИНИ-ПИТЫ ---
   { name: "Шрам",                img: "https://cdn.r-2.online/image/monsters/371_IDLE.gif", cat: "mini" },
   { name: "Чабон",               img: "https://cdn.r-2.online/image/monsters/389_IDLE.gif", cat: "mini" },
   { name: "Руум",                img: "https://cdn.r-2.online/image/monsters/364_IDLE.gif", cat: "mini" },
@@ -440,7 +502,34 @@ const BOSSES = [
   { name: "Вождь гигантов",      img: "https://cdn.r-2.online/image/monsters/120_IDLE.gif", cat: "mini" },
   { name: "Крепкий скелет",      img: "https://cdn.r-2.online/image/monsters/359_IDLE.gif", cat: "mini" },
   { name: "Король Ракум",        img: "https://cdn.r-2.online/image/monsters/704_IDLE.gif", cat: "mini" },
-  { name: "Королева гарпий",     img: "https://cdn.r-2.online/image/monsters/363_IDLE.gif", cat: "mini" }
+  { name: "Королева гарпий",     img: "https://cdn.r-2.online/image/monsters/363_IDLE.gif", cat: "mini" },
+
+  // --- ПИТЫ ---
+  { name: "Орг",                 img: "https://cdn.r-2.online/image/monsters/93_IDLE.gif", cat: "pit", respawn: 260*60000, window: 60*60000 },
+  { name: "Орг-маг",             img: "https://cdn.r-2.online/image/monsters/99_IDLE.gif", cat: "pit", respawn: 130*60000, window: 90*60000 },
+  { name: "Виверна",             img: "https://cdn.r-2.online/image/monsters/408_IDLE.gif", cat: "pit", respawn: 240*60000 },
+  { name: "Горгулья",            img: "https://cdn.r-2.online/image/monsters/95_IDLE.gif", cat: "pit", respawn: 60*60000, window: 30*60000 },
+  { name: "Огненный демон",      img: "https://cdn.r-2.online/image/monsters/401_IDLE.gif", cat: "pit", respawn: 60*60000, window: 30*60000 },
+  { name: "Черный единорог",     img: "https://cdn.r-2.online/image/monsters/102_IDLE.gif", cat: "pit", respawn: 100*60000, window: 60*60000 },
+  { name: "Наездница на виверне",img: "https://cdn.r-2.online/image/monsters/871_IDLE.gif", cat: "pit", respawn: 480*60000, window: 120*60000 },
+  { name: "Астарот",             img: "https://cdn.r-2.online/image/monsters/854_IDLE.gif", cat: "pit", respawn: 470*60000, window: 450*60000 },
+  { name: "Лилит",               img: "https://cdn.r-2.online/image/monsters/855_IDLE.gif", cat: "pit", respawn: 450*60000, window: 480*60000 },
+  { name: "Командующий копейщиков",img: "https://cdn.r-2.online/image/monsters/1018_IDLE.gif", cat: "pit", respawn: 240*60000 },
+  { name: "Королева горишей",    img: "https://cdn.r-2.online/image/monsters/661_IDLE.gif", cat: "pit", respawn: 480*60000, window: 50*60000 },
+  { name: "Спектр",              img: "https://cdn.r-2.online/image/monsters/84_IDLE.gif", cat: "pit", respawn: 480*60000, window: 480*60000 },
+  { name: "Хватафорс",           img: "https://cdn.r-2.online/image/monsters/577_IDLE.gif", cat: "pit", respawn: 600*60000 },
+  { name: "Гвардеец ада",        img: "https://cdn.r-2.online/image/monsters/540_IDLE.gif", cat: "pit", respawn: 600*60000 },
+  { name: "Черная виверна",      img: "https://cdn.r-2.online/image/monsters/538_IDLE.gif", cat: "pit", respawn: 620*60000 },
+  { name: "Командующий копейщиков (8ч)",img: "https://cdn.r-2.online/image/monsters/1018_IDLE.gif", cat: "pit", respawn: 480*60000, window: 240*60000 },
+  { name: "Король-лич",          img: "https://cdn.r-2.online/image/monsters/818_IDLE.gif", cat: "pit", respawn: 570*60000 },
+  { name: "Властитель континента",img: "https://cdn.r-2.online/image/monsters/1636_IDLE.gif", cat: "pit", respawn: 240*60000, window: 240*60000 },
+  { name: "Хранитель сильного яда",img: "https://cdn.r-2.online/image/monsters/1640_IDLE.gif", cat: "pit", respawn: 240*60000, window: 240*60000 },
+  { name: "Завоеватель океана",  img: "https://cdn.r-2.online/image/monsters/1644_IDLE.gif", cat: "pit", respawn: 240*60000, window: 240*60000 },
+  { name: "Огненный тиран",      img: "https://cdn.r-2.online/image/monsters/1648_IDLE.gif", cat: "pit", respawn: 240*60000, window: 240*60000 },
+  { name: "Бельжевит",           img: "https://cdn.r-2.online/image/monsters/536_IDLE.gif", cat: "pit", respawn: 630*60000 },
+  { name: "Урук-хай",            img: "https://cdn.r-2.online/image/monsters/472_IDLE.gif", cat: "pit", respawn: 520*60000 },
+  { name: "Снежная королева",    img: "https://cdn.r-2.online/image/monsters/121_IDLE.gif", cat: "pit", respawn: 540*60000, window: 500*60000 },
+  { name: "Страж Метеоса",       img: "https://cdn.r-2.online/image/monsters/895_IDLE.gif", cat: "pit", respawn: 1200*60000, window: 240*60000 }
 ];
 
 const KEY_ICON_URL = "https://static.r2online.ru/wiki/icons/v2/item09/96_96_48.webp";
@@ -457,16 +546,24 @@ let settings = loadJSON(SETTINGS_KEY, { cols: 2, scale: 1, theme: "classic", dev
 let stats = loadJSON(STATS_KEY, { sessions: [], currentSession: null });
 
 if (stats.sessions) {
-  stats.sessions.forEach(s => { if (!s.drops) s.drops = []; if (!s.totalKills) s.totalKills = s.drops.length; });
+  stats.sessions.forEach(s => { 
+    if (!s.drops) s.drops = []; 
+    if (!s.totalKills) s.totalKills = s.drops.length; 
+    if (!s.miniKills) s.miniKills = 0;
+    if (!s.pitKills) s.pitKills = 0;
+  });
 }
-if (stats.currentSession && !stats.currentSession.totalKills) {
-  stats.currentSession.totalKills = 0;
+if (stats.currentSession) {
+  if (!stats.currentSession.totalKills) stats.currentSession.totalKills = 0;
+  if (!stats.currentSession.miniKills) stats.currentSession.miniKills = 0;
+  if (!stats.currentSession.pitKills) stats.currentSession.pitKills = 0;
 }
 
 let currentTab = "farm";
 let currentSubTab = "current";
 let tickInterval = null;
 let sessionTimerInterval = null;
+let editingBossIndex = -1;
 
 if (settings.device === "pc" && !settings.colsPcSet) {
   settings.cols = 4;
@@ -597,6 +694,7 @@ function createBossCard(i) {
   const el = document.createElement("div");
   el.className = "boss";
   el.dataset.index = i;
+  if (boss.cat === "pit") el.classList.add("boss-pit");
 
   if (currentTab === "edit") {
     const isSel = farm.includes(i);
@@ -608,7 +706,7 @@ function createBossCard(i) {
     return el;
   }
 
-  if (currentTab === "farm" && stats.currentSession) {
+  if (currentTab === "farm" && stats.currentSession && boss.cat === "mini") {
     const keyBtn = document.createElement("button");
     keyBtn.className = "btn-key show";
     const img = document.createElement("img");
@@ -638,10 +736,18 @@ function updateBossCard(el, i, now) {
   const keyBtn = el.querySelector(".btn-key");
   
   const left = t ? t.end - now : null;
+  const windowMs = boss.window || 0;
   
   let newState = "idle";
   if (!t) newState = "idle";
-  else if (left <= 0) newState = "ready";
+  else if (left <= 0) {
+    if (windowMs > 0) {
+      if (now - t.end > windowMs) newState = "ready";
+      else newState = "window";
+    } else {
+      newState = "ready";
+    }
+  }
   else newState = "running";
 
   if (keyBtn) {
@@ -662,22 +768,67 @@ function updateBossCard(el, i, now) {
         el.dataset.notified15s = "1";
         showNotification(`⏱ ${boss.name} респавнится!`, `Осталось 15 секунд до появления.`, i, 'warning');
       }
+    } else if (newState === "window") {
+      const windowLeft = windowMs - (now - t.end);
+      const m = Math.floor(windowLeft / 60000);
+      const s = Math.floor((windowLeft % 60000) / 1000);
+      const timeStr = `${m}:${s.toString().padStart(2, "0")}`;
+      if (statusEl.textContent !== "В ОКНЕ!") statusEl.textContent = "В ОКНЕ!";
+      
+      let wTimerEl = el.querySelector(".window-timer");
+      if (!wTimerEl) {
+        wTimerEl = document.createElement("div");
+        wTimerEl.className = "window-timer";
+        statusEl.appendChild(wTimerEl);
+      }
+      if (wTimerEl.textContent !== timeStr) wTimerEl.textContent = timeStr;
     }
     return;
   }
 
   el.dataset.state = newState;
   el.dataset.notified15s = "";
-  el.classList.remove("running", "ready");
+  el.classList.remove("running", "ready", "window-state");
   actions.className = "actions"; actions.innerHTML = "";
+
+  const oldWTimer = statusEl.querySelector(".window-timer");
+  if (oldWTimer) oldWTimer.remove();
 
   if (newState === "idle") {
     statusEl.textContent = "— готов";
     killedEl.textContent = ""; respEl.textContent = "";
+    if (boss.cat === "pit") {
+        actions.classList.add("row");
+        const killBtn = document.createElement("button");
+        killBtn.className = "btn-kill"; killBtn.textContent = "Босс убит";
+        killBtn.onclick = (e) => { e.stopPropagation(); startBoss(i, true); };
+        const customBtn = document.createElement("button");
+        customBtn.className = "btn-custom"; customBtn.textContent = "Добавить рес";
+        customBtn.onclick = (e) => { e.stopPropagation(); openTimeModal(i); };
+        actions.appendChild(killBtn);
+        actions.appendChild(customBtn);
+    } else {
+        const killBtn = document.createElement("button");
+        killBtn.className = "btn-kill"; killBtn.textContent = "Босс убит";
+        killBtn.onclick = (e) => { e.stopPropagation(); startBoss(i); };
+        actions.appendChild(killBtn);
+    }
+  } else if (newState === "window") {
+    el.classList.add("window-state");
+    statusEl.textContent = "В ОКНЕ!";
+    actions.classList.add("row");
     const killBtn = document.createElement("button");
-    killBtn.className = "btn-kill"; killBtn.textContent = "Босс убит";
-    killBtn.onclick = (e) => { e.stopPropagation(); startBoss(i); };
-    actions.appendChild(killBtn);
+    killBtn.className = "btn-kill"; killBtn.textContent = "Убит";
+    killBtn.onclick = (e) => { e.stopPropagation(); startBoss(i, true); };
+    const resetBtn = document.createElement("button");
+    resetBtn.className = "btn-reset"; resetBtn.textContent = "Сброс";
+    resetBtn.onclick = (e) => { e.stopPropagation(); resetBoss(i); };
+    actions.appendChild(killBtn); actions.appendChild(resetBtn);
+
+    if (!el.dataset.notified) {
+      el.dataset.notified = "1"; 
+      notifyReady(boss.name, i);
+    }
   } else if (newState === "ready") {
     el.classList.add("ready");
     statusEl.textContent = "ГОТОВ!";
@@ -706,8 +857,17 @@ function updateBossCard(el, i, now) {
   }
   
   if (t) {
-    killedEl.textContent = `Убит в ${fmtTime(t.killedAt)}`;
-    respEl.textContent = `Рес в ${fmtTime(t.end)}`;
+    if (boss.cat === "pit") {
+        killedEl.textContent = `Убит в ${fmtTime(t.killedAt)}`;
+        if (windowMs > 0) {
+            respEl.textContent = `Рес с ${fmtTime(t.end)} по ${fmtTime(t.end + windowMs)}`;
+        } else {
+            respEl.textContent = `Рес в ${fmtTime(t.end)}`;
+        }
+    } else {
+        killedEl.textContent = `Убит в ${fmtTime(t.killedAt)}`;
+        respEl.textContent = `Рес в ${fmtTime(t.end)}`;
+    }
   }
 }
 
@@ -773,20 +933,21 @@ function render() {
     container.appendChild(gridMini);
 
     const titlePit = document.createElement("div");
-    titlePit.className = "category-title empty-cat";
-    titlePit.textContent = "Питы (скоро)";
+    titlePit.className = "category-title";
+    titlePit.textContent = "Питы";
     container.appendChild(titlePit);
 
-    if (raidBosses.length > 0) {
-      const gridPit = document.createElement("div");
-      gridPit.className = "grid";
-      raidBosses.forEach(i => {
-        const el = createBossCard(i);
-        if (currentTab !== "edit") { el.dataset.state = ""; updateBossCard(el, i, now); }
-        gridPit.appendChild(el);
-      });
-      container.appendChild(gridPit);
+    const gridPit = document.createElement("div");
+    gridPit.className = "grid";
+    if (raidBosses.length === 0 && searchQuery) {
+        gridPit.innerHTML = `<div class="empty" style="padding: 10px; font-size: 12px;">Нет совпадений</div>`;
     }
+    raidBosses.forEach(i => {
+      const el = createBossCard(i);
+      if (currentTab !== "edit") { el.dataset.state = ""; updateBossCard(el, i, now); }
+      gridPit.appendChild(el);
+    });
+    container.appendChild(gridPit);
   }
   
   updateFarmControlsUI();
@@ -806,7 +967,7 @@ function tick() {
     currentOrder.forEach(i => {
       const t = getTimer(i); const el = grid.querySelector(`[data-index="${i}"]`);
       if (!el || !t) return;
-      const wasReady = el.dataset.state === "ready";
+      const wasReady = el.dataset.state === "ready" || el.dataset.state === "window";
       const isReady = (t.end - now) <= 0;
       if (wasReady !== isReady) orderChanged = true;
     });
@@ -841,17 +1002,29 @@ function toggleSelect(i) {
 
 function saveSelection() { saveFarm(); switchMainTab("farm"); }
 
-function startBoss(i, force = false, isKey = false) {
+function startBoss(i, force = false, isKey = false, customTime = null) {
   const now = Date.now();
   const t = getTimer(i);
   if (!force && t && t.end > now) return;
   
+  let killedAt = now;
+  if (customTime !== null) killedAt = customTime;
+
   const respawnTime = BOSSES[i].respawn || DEFAULT_RESPAWN;
-  timers[i] = { end: now + respawnTime, killedAt: now };
+  timers[i] = { end: killedAt + respawnTime, killedAt: killedAt };
   
   if (stats.currentSession) {
     if (!stats.currentSession.totalKills) stats.currentSession.totalKills = 0;
     stats.currentSession.totalKills += 1;
+    
+    // Раздельный подсчет
+    if (BOSSES[i].cat === "mini") {
+        if (!stats.currentSession.miniKills) stats.currentSession.miniKills = 0;
+        stats.currentSession.miniKills += 1;
+    } else {
+        if (!stats.currentSession.pitKills) stats.currentSession.pitKills = 0;
+        stats.currentSession.pitKills += 1;
+    }
     
     if (isKey) {
       stats.currentSession.keys += 1;
@@ -950,6 +1123,8 @@ function toggleFarmSession() {
       duration: duration,
       keys: stats.currentSession.keys,
       totalKills: stats.currentSession.totalKills || 0,
+      miniKills: stats.currentSession.miniKills || 0,
+      pitKills: stats.currentSession.pitKills || 0,
       drops: stats.currentSession.drops || []
     });
     stats.currentSession = null;
@@ -958,7 +1133,7 @@ function toggleFarmSession() {
     switchSubTab("stats");
     render();
   } else {
-    stats.currentSession = { startTime: Date.now(), keys: 0, totalKills: 0, drops: [] };
+    stats.currentSession = { startTime: Date.now(), keys: 0, totalKills: 0, miniKills: 0, pitKills: 0, drops: [] };
     saveStats();
     render();
     startSessionTimer();
@@ -1014,12 +1189,18 @@ function updateFarmControlsUI() {
 function renderStats() {
   const container = document.getElementById("statsView");
   const totalKeys = stats.sessions.reduce((sum, s) => sum + s.keys, 0) + (stats.currentSession ? stats.currentSession.keys : 0);
-  const totalKills = stats.sessions.reduce((sum, s) => sum + (s.totalKills || 0), 0) + (stats.currentSession ? (stats.currentSession.totalKills || 0) : 0);
+  
+  const totalMini = stats.sessions.reduce((sum, s) => sum + (s.miniKills || 0), 0) + (stats.currentSession ? (stats.currentSession.miniKills || 0) : 0);
+  const totalPit = stats.sessions.reduce((sum, s) => sum + (s.pitKills || 0), 0) + (stats.currentSession ? (stats.currentSession.pitKills || 0) : 0);
+  const totalKills = totalMini + totalPit;
   
   let html = `
     <div class="stat-card">
       <h3>Всего убито боссов</h3>
-      <div class="val">${totalKills}</div>
+      <div class="val" style="font-size: 18px; text-align: right;">
+        Мини-Пит: <span style="color:#4ade80">${totalMini}</span><br>
+        Пит: <span style="color:#f5a623">${totalPit}</span>
+      </div>
     </div>
     <div class="stat-card">
       <h3>Всего выбито ключей</h3>
@@ -1035,7 +1216,10 @@ function renderStats() {
     html += `
       <div class="stat-card" style="border-color: var(--accent);">
         <h3>Текущая сессия</h3>
-        <div class="val" style="color: #4ade80; font-size: 20px;">${stats.currentSession.totalKills || 0} убито / ${stats.currentSession.keys} ключей</div>
+        <div class="val" style="font-size: 18px; text-align: right;">
+          Мини-Пит: <span style="color:#4ade80">${stats.currentSession.miniKills || 0}</span><br>
+          Пит: <span style="color:#f5a623">${stats.currentSession.pitKills || 0}</span>
+        </div>
       </div>
     `;
   }
@@ -1055,7 +1239,7 @@ function renderStats() {
           </div>
           <div style="display:flex; align-items:center; gap: 12px;">
             <div style="font-size: 12px; color: var(--text-muted); text-align: right;">
-              Убито: <strong style="color: var(--text-color);">${s.totalKills || 0}</strong><br>
+              Мини: <strong style="color: #4ade80;">${s.miniKills || 0}</strong> / Пит: <strong style="color: #f5a623;">${s.pitKills || 0}</strong><br>
               Ключей: <strong style="color: var(--accent);">${s.keys}</strong>
             </div>
             <div class="arrow">›</div>
@@ -1084,7 +1268,8 @@ function openSessionDetails(idx) {
   const body = document.getElementById("sessionModalBody");
   
   let html = `<div style="font-size: 13px; margin-bottom: 12px; color: var(--text-muted);">
-    Всего убито боссов: <strong style="color: var(--text-color);">${s.totalKills || 0}</strong><br>
+    Всего убито: <strong style="color: var(--text-color);">${s.totalKills || 0}</strong><br>
+    <span style="font-size: 12px; color:#4ade80;">Мини-Пит: ${s.miniKills || 0}</span> <span style="color:#555;">|</span> <span style="font-size: 12px; color:#f5a623;">Пит: ${s.pitKills || 0}</span><br>
     Выбито ключей: <strong style="color: var(--accent);">${s.keys}</strong><br>
     Время сессии: <strong>${fmtDuration(s.duration)}</strong>
   </div>`;
@@ -1225,6 +1410,36 @@ function toggleMinimal() {
 function resetSettings() {
   settings = { cols: 2, scale: 1, theme: "classic", device: "mobile", minimal: false };
   saveSettings(); applySettings(); renderSettings();
+}
+
+// --- МОДАЛКА ВРЕМЕНИ ---
+function openTimeModal(i) {
+  editingBossIndex = i;
+  document.getElementById("timeModal").classList.add("show");
+  document.getElementById("timeHours").value = "";
+  document.getElementById("timeMinutes").value = "";
+  document.getElementById("timeSeconds").value = "";
+}
+
+function closeTimeModal() {
+  document.getElementById("timeModal").classList.remove("show");
+  editingBossIndex = -1;
+}
+
+function submitCustomTime() {
+  const h = parseInt(document.getElementById("timeHours").value) || 0;
+  const m = parseInt(document.getElementById("timeMinutes").value) || 0;
+  const s = parseInt(document.getElementById("timeSeconds").value) || 0;
+  
+  const now = new Date();
+  const customDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, s);
+  
+  if (customDate.getTime() > now.getTime()) {
+    customDate.setDate(customDate.getDate() - 1);
+  }
+  
+  startBoss(editingBossIndex, true, false, customDate.getTime());
+  closeTimeModal();
 }
 
 applySettings();
